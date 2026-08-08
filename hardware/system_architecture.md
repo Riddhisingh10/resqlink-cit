@@ -58,7 +58,7 @@ flowchart TD
     SUPA_DB -->|Realtime Sub| DASH
     JSON_DB <--> API_REQ
     
-    API_AI -->|Ollama / local LLM| OLLAMA:::ext
+    API_AI -->|Groq API| GROQ:::ext
     MAP_W -->|Routing| OSRM:::ext
     DASH -->|Weather| OWM:::ext
 ```
@@ -81,7 +81,7 @@ flowchart TD
 
 ### Tier 3 & 4 — Command & Control (Next.js Dashboard)
 *   **Deployment Options:** Hosted on Vercel/Supabase (Online mode) or locally on an offline Raspberry Pi Zero 2 W acting as a local Wi-Fi AP.
-*   **Dashboard Features:** React Leaflet maps, Project OSRM local routing, and locally hosted Gemma model via Ollama for situational summaries.
+*   **Dashboard Features:** React Leaflet maps, Project OSRM local routing, and cloud-hosted Llama-3.3-70b-versatile via Groq API for situational summaries and triage classification.
 
 ---
 

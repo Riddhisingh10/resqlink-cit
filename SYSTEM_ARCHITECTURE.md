@@ -67,7 +67,7 @@ flowchart LR
 
     subgraph EXT ["TIER 5 — External Services"]
         direction TB
-        OLLAMA["Ollama (Gemma4)"]:::ext
+        GROQ["Groq API (Llama-3.3-70b)"]:::ext
         OWM["OpenWeatherMap"]:::ext
         OSRM["Project OSRM"]:::ext
         TELE_APP["Telegram App"]:::ext
@@ -82,7 +82,7 @@ flowchart LR
     SUPA_DB -->|Realtime Sub| DASH
     JSON_DB <--> API_REQ
     
-    API_AI -->|Prompts| OLLAMA
+    API_AI -->|Prompts| GROQ
     MAP_W -->|Routing| OSRM
     DASH -->|Weather| OWM
     
@@ -131,10 +131,10 @@ flowchart LR
 | Framework | Next.js 16.2.6 (Turbopack) | React 19.2, Server-Side Rendering, API Routes |
 | Map Engine | Leaflet.js 1.9.4 | Interactive tactical map with markers, polylines, popups |
 | Map Themes | OpenStreetMap + CARTO Dark | Normal mode + Tactical (dark) mode toggle |
-| AI Assistant | Ollama (localhost:11434) | Local Gemma4 LLM situation report generation |
+| AI Assistant | Groq API | Cloud-hosted Llama-3.3-70b-versatile for tactical summaries & triage |
 | Database | Supabase (PostgreSQL) | Realtime `sensor_logs` tracking hardware telemetry |
 | Mesh Sync DB| `requests.json` | Local file DB deduplicating mobile mesh SyncBridge posts |
-| ML Priority | Custom scoring matrix | Resource-type × severity × affected-count = priority class |
+| Custom ML Priority | Custom scoring matrix | Resource-type × severity × affected-count = priority class |
 | Translations | React state TRANSLATIONS | Full UI bilingual toggle: English ↔ Kannada |
 | SOS Panic | Browser Geolocation API | One-tap GPS + Telegram alert broadcast to emergency team |
 | Dispatch | Interactive modal | Select volunteer → view all active requests → assign |
@@ -143,7 +143,7 @@ flowchart LR
 
 | Service | Endpoint | Usage |
 |:---|:---|:---|
-| Ollama (Local) | `http://localhost:11434/api/generate` | Gemma4 9.6GB local LLM — AI situation summaries |
+| Groq API | `https://api.groq.com/openai/v1/chat/completions` | Llama-3.3-70b-versatile cloud model — AI situation summaries & JSON triage |
 | OpenWeatherMap | `api.openweathermap.org/data/2.5/weather` | Weather conditions by lat/lng + language param |
 | Project OSRM | `router.project-osrm.org/route/v1/driving/` | Multi-point driving route with GeoJSON geometry |
 | Telegram Bot | `api.telegram.org/bot{token}/sendMessage` | Emergency SOS alert push + interactive /status commands |
@@ -227,6 +227,7 @@ sequenceDiagram
     participant E as 🔌 ESP32 Station
     participant S as 🗄️ Supabase PostgreSQL
     participant N as 🖥️ Next.js Dashboard
+    participant G as 🤖 Groq LLM API
     participant A as 👤 Admin Dispatcher
 
     E->>S: HTTPS POST sensor_logs<br/>(temp, hum, soil, water, seismic, rain, status)
@@ -235,7 +236,8 @@ sequenceDiagram
     N-->>A: Display visual warning badges
     A->>N: Click "Generate AI Report"
     N->>N: POST sensor snapshot to /api/ai-summary
-    N->>N: Ollama gemma4 processes prompt
+    N->>G: POST prompt to Groq API (Llama-3.3)
+    G-->>N: Return JSON summary
     N-->>A: Display Situation Summary
 ```
 

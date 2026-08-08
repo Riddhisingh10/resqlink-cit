@@ -662,22 +662,30 @@ export default function Home() {
 
   // 2. Live Hardware Data Polling (Supabase REST API)
   useEffect(() => {
-    const supabaseUrl = "https://roypndzefjunimxzvcnf.supabase.co/rest/v1/sensor_logs?select=*&order=created_at.desc&limit=1";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveXBuZHplZmp1bmlteHp2Y25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTgwNTMsImV4cCI6MjA5Mzc5NDA1M30.bxHGO-nOBEsTBDUg8WIVHRr3Qyxy0g1DxokvVOHqK18";
-
+    let active = true;
     const fetchSensorData = async () => {
       try {
+        const configResponse = await fetch('/api/config');
+        const config = await configResponse.json();
+        
+        const rawUrl = config.SUPABASE_URL || "https://roypndzefjunimxzvcnf.supabase.co";
+        const key = config.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveXBuZHplZmp1bmlteHp2Y25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTgwNTMsImV4cCI6MjA5Mzc5NDA1M30.bxHGO-nOBEsTBDUg8WIVHRr3Qyxy0g1DxokvVOHqK18";
+        
+        const supabaseUrl = `${rawUrl.replace(/\/$/, '')}/rest/v1/sensor_logs?select=*&order=created_at.desc&limit=1`;
+
         const response = await fetch(supabaseUrl, {
           headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`
+            apikey: key,
+            Authorization: `Bearer ${key}`
           }
         });
         const data = await response.json();
+        if (!active) return;
         if (data && data.length > 0) {
           setSensorData(data[0]);
         }
       } catch (err) {
+        if (!active) return;
         // Suppress repeating console.error and use simulated data for offline/disconnected environment
         setSensorData(prev => {
           const deltaTemp = (Math.random() - 0.5) * 0.4;
@@ -708,7 +716,10 @@ export default function Home() {
     // Then poll every 10 seconds
     const interval = setInterval(fetchSensorData, 10000);
 
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
 
   // 2.5 Live SMS Data Polling (Google Sheets)
@@ -802,10 +813,10 @@ export default function Home() {
       if (data.summary) {
         setAiSummaryOutput(data.summary);
       } else {
-        setAiSummaryOutput(lang === 'kn' ? "AI ಲಾಗ್‌ಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಸ್ಥಳೀಯ gemma4:latest ಪ್ರತಿಯನ್ನು ಪರಿಶೀಲಿಸಿ." : "AI failed to infer logs. Please check local gemma4:latest instance.");
+        setAiSummaryOutput(lang === 'kn' ? "AI ಸಾರಾಂಶವನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು Groq API ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ." : "AI failed to generate summary. Please check Groq API connection.");
       }
     } catch (err) {
-      setAiSummaryOutput(lang === 'kn' ? "ಆಫ್‌ಲೈನ್: ದಯವಿಟ್ಟು 'gemma4:latest' ಮಾದರಿಯೊಂದಿಗೆ ಸ್ಥಳೀಯ Ollama ರನ್ ಆಗುತ್ತಿರುವುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ." : "Offline: Please verify local Ollama daemon is running with model 'gemma4:latest'.");
+      setAiSummaryOutput(lang === 'kn' ? "ನೆಟ್‌ವರ್ಕ್ ದೋಷ: ದಯವಿಟ್ಟು ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಅಥವಾ Groq API ಕೀ ಸಂರಚನೆಯನ್ನು ಪರಿಶೀಲಿಸಿ." : "Network Error: Please check internet connection or verify Groq API key configuration.");
     } finally {
       setIsAiLoading(false);
     }

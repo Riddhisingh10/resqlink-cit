@@ -8,20 +8,33 @@ export async function POST(req) {
     const prompt = `As a Disaster Response AI Assistant, analyze these sensor readings and provide a 2-sentence tactical summary for the incident commander. Mention any critical threats. ${languageInstruction}
     Readings: ${JSON.stringify(sensorData)}`;
 
-    const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        model: 'gemma4:latest',
-        prompt: prompt,
-        stream: false
+        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3
       })
     });
 
-    const data = await ollamaResponse.json();
-    return Response.json({ summary: data.response });
+    const data = await groqResponse.json();
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      return Response.json({ summary: data.choices[0].message.content.trim() });
+    } else {
+      console.error("Groq Response Error Details:", data);
+      throw new Error(data.error?.message || "Invalid response structure from Groq");
+    }
   } catch (error) {
     console.error("AI Error:", error);
-    return Response.json({ error: "AI processing failed" }, { status: 500 });
+    return Response.json({ error: error.message || "AI processing failed" }, { status: 500 });
   }
 }

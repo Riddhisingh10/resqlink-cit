@@ -55,7 +55,7 @@ export async function POST(req) {
         : "Non-critical query. Standard logging applied.";
     }
 
-    // Try calling local Ollama if available
+    // Try calling Groq API
     try {
       const languageInstruction = lang === 'kn' 
         ? 'The output summary MUST be written in Kannada language.' 
@@ -74,33 +74,45 @@ export async function POST(req) {
         "mlConfidence": 0.95
       }`;
 
-      // Set a short timeout (e.g. 1.5 seconds) using AbortController to avoid blocking
+      // Set a timeout of 4 seconds using AbortController to avoid blocking
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 1500);
+      const id = setTimeout(() => controller.abort(), 4000);
 
-      const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+      const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        },
         body: JSON.stringify({
-          model: 'gemma4:latest',
-          prompt: prompt,
-          stream: false,
-          format: 'json'
+          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.2
         }),
         signal: controller.signal
       });
       clearTimeout(id);
 
-      const data = await ollamaResponse.json();
-      const aiResponse = JSON.parse(data.response);
-      
-      if (aiResponse.mlPriorityClass && aiResponse.triageSummary) {
-        mlPriorityClass = aiResponse.mlPriorityClass.toLowerCase();
-        triageSummary = aiResponse.triageSummary;
-        mlConfidence = aiResponse.mlConfidence || 0.92;
+      const data = await groqResponse.json();
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        const aiResponse = JSON.parse(data.choices[0].message.content.trim());
+        if (aiResponse.mlPriorityClass && aiResponse.triageSummary) {
+          mlPriorityClass = aiResponse.mlPriorityClass.toLowerCase();
+          triageSummary = aiResponse.triageSummary;
+          mlConfidence = aiResponse.mlConfidence || 0.92;
+        }
+      } else {
+        console.error("Groq Triage Response Error Details:", data);
       }
-    } catch (_) {
-      // Offline or Ollama offline - gracefully fallback to rule-based classification
+    } catch (e) {
+      console.warn("Groq Triage Error (falling back to rules):", e);
+      // Offline or Groq offline - gracefully fallback to rule-based classification
     }
 
     return Response.json({
