@@ -1,4 +1,4 @@
-# 📡 ResQLink: Hybrid LoRa-Based Disaster Monitoring & Communication System
+#📡 ResQLink: Hybrid LoRa-Based Disaster Monitoring & Communication System
 
 > **IEEE Region 10 Humanitarian Technology Activities (HTA) Makers DIY Project Competition Entry**
 > **WINNERS PES HACKATHON**
