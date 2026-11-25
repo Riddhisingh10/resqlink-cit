@@ -50,6 +50,10 @@ const char* chatID = "7988893018";
 const char* supabase_url = "https://roypndzefjunimxzvcnf.supabase.co/rest/v1/sensor_logs";
 const char* supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveXBuZHplZmp1bmlteHp2Y25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTgwNTMsImV4cCI6MjA5Mzc5NDA1M30.bxHGO-nOBEsTBDUg8WIVHRr3Qyxy0g1DxokvVOHqK18";
 
+// Local Next.js Dashboard Endpoint (Set to your laptop's Wi-Fi IP address on port 3000)
+const char* local_dashboard_url = "http://192.168.43.100:3000/api/telemetry";
+const bool enable_local_dashboard_sync = true;
+
 // ================== Logic Variables ==================
 float prevTemp = 0, prevHum = 0, prevWaterDistance = 0, prevSeismic = 0, prevAir = 0, prevRain = 0;
 int prevSoil = 0;
@@ -153,6 +157,20 @@ void pushToSupabase(float t, float h, int s, float w, float v, float a, float r,
     Serial.printf(" [✘] Supabase Error: %s\n", http.errorToString(response).c_str());
   }
   http.end();
+
+  // Local Next.js Dashboard Direct Sync (Local Wi-Fi / Hotspot)
+  if (enable_local_dashboard_sync && strlen(local_dashboard_url) > 0) {
+    HTTPClient localHttp;
+    localHttp.begin(local_dashboard_url);
+    localHttp.addHeader("Content-Type", "application/json");
+    int localResp = localHttp.POST(json);
+    if (localResp > 0) {
+      Serial.printf(" [✔] Local Website Dashboard Synced (Code: %d)\n", localResp);
+    } else {
+      Serial.printf(" [!] Local Website Sync: %s (Check laptop IP on port 3000)\n", localHttp.errorToString(localResp).c_str());
+    }
+    localHttp.end();
+  }
 }
 
 void handleNewMessages(int numNewMessages) {

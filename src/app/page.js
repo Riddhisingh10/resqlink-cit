@@ -660,10 +660,25 @@ export default function Home() {
     fetchWeather(currentBaseLocation.lat, currentBaseLocation.lng);
   }, [currentBaseLocation, lang]);
 
-  // 2. Live Hardware Data Polling (Supabase REST API)
+  // 2. Live Hardware Data Polling (Direct /api/telemetry or Supabase REST API)
   useEffect(() => {
     let active = true;
     const fetchSensorData = async () => {
+      try {
+        // 1. Try local hardware endpoint first (fast, direct ESP32 or demo bridge)
+        const localRes = await fetch('/api/telemetry');
+        if (localRes.ok) {
+          const telemetryData = await localRes.json();
+          if (telemetryData && telemetryData.temperature !== undefined) {
+            if (!active) return;
+            setSensorData(prev => ({ ...prev, ...telemetryData }));
+            return;
+          }
+        }
+      } catch (e) {
+        // Fall back to Supabase
+      }
+
       try {
         const configResponse = await fetch('/api/config');
         const config = await configResponse.json();
@@ -682,7 +697,8 @@ export default function Home() {
         const data = await response.json();
         if (!active) return;
         if (data && data.length > 0) {
-          setSensorData(data[0]);
+          setSensorData(prev => ({ ...prev, ...data[0] }));
+          return;
         }
       } catch (err) {
         if (!active) return;
@@ -704,7 +720,7 @@ export default function Home() {
             seismic: parseFloat((Math.max(0.01, Math.min(2.0, prev.seismic + deltaSeismic))).toFixed(3)),
             air_quality: Math.max(10, Math.min(300, prev.air_quality + deltaAir)),
             created_at: new Date().toISOString(),
-            status: "Simulated (Offline)"
+            status: prev.status || "Simulated (Offline)"
           };
         });
       }
@@ -713,8 +729,8 @@ export default function Home() {
     // Fetch immediately on mount
     fetchSensorData();
 
-    // Then poll every 10 seconds
-    const interval = setInterval(fetchSensorData, 10000);
+    // Then poll every 4 seconds for responsive live hardware updates
+    const interval = setInterval(fetchSensorData, 4000);
 
     return () => {
       active = false;
@@ -1361,6 +1377,78 @@ export default function Home() {
     }
   };
 
+  const handleTriggerHardwareDemo = async (type) => {
+    let payload = {};
+    if (type === 'earthquake') {
+      payload = {
+        seismic: 18.2,
+        status: "🚨 CRITICAL: SEISMIC TREMOR DETECTED (MPU6050)",
+        created_at: new Date().toISOString()
+      };
+      showToast(lang === 'kn' ? '🚨 ಭೂಕಂಪನ ಪತ್ತೆಯಾಗಿದೆ! (MPU6050: 18.2 m/s²)' : '🚨 Seismic Ground Tremor Triggered! (MPU6050: 18.2 m/s²)', 'error');
+    } else if (type === 'flood') {
+      payload = {
+        water_level: 285.0,
+        rain_level: 80,
+        status: "🌊 CRITICAL: FLOOD WATER RISING (HC-SR04)",
+        created_at: new Date().toISOString()
+      };
+      showToast(lang === 'kn' ? '🌊 ಪ್ರವಾಹ ಎಚ್ಚರಿಕೆ! (HC-SR04: 285 cm)' : '🌊 Flood Surge Alarm Triggered! (HC-SR04: 285 cm)', 'error');
+    } else if (type === 'cloudburst') {
+      payload = {
+        rain_level: 95,
+        humidity: 98.0,
+        status: "🌧️ WARNING: HEAVY CLOUDBURST (Rain Grid)",
+        created_at: new Date().toISOString()
+      };
+      showToast(lang === 'kn' ? '🌧️ ಭಾರಿ ಮಳೆ ಎಚ್ಚರಿಕೆ!' : '🌧️ Severe Downpour / Cloudburst Alert!', 'warning');
+    } else if (type === 'gas') {
+      payload = {
+        air_quality: 1950,
+        temperature: 42.0,
+        status: "💨 DANGER: TOXIC SMOKE / FIRE DETECTED (MQ-2)",
+        created_at: new Date().toISOString()
+      };
+      showToast(lang === 'kn' ? '💨 ವಿಷಕಾರಿ ಹೊಗೆ / ಅನಿಲ ಸೋರಿಕೆ!' : '💨 Toxic Gas / Smoke Alarm Triggered! (MQ-2: 1950 ADC)', 'error');
+    } else if (type === 'storm') {
+      payload = {
+        baro_pressure: 982.0,
+        wind_speed: 68.5,
+        status: "🌪️ ALARM: CYCLONE / GALE STORM (BMP280)",
+        created_at: new Date().toISOString()
+      };
+      showToast(lang === 'kn' ? '🌪️ ಚಂಡಮಾರುತ ಎಚ್ಚರಿಕೆ!' : '🌪️ Cyclone / Gale Force Winds Alert! (68.5 km/h)', 'warning');
+    } else if (type === 'reset') {
+      payload = {
+        temperature: 24.5,
+        humidity: 62.0,
+        soil_moisture: 2100,
+        water_level: 120.0,
+        seismic: 0.05,
+        air_quality: 180,
+        rain_level: 0,
+        baro_pressure: 1011.5,
+        altitude: 770.0,
+        wind_speed: 12.5,
+        wind_direction: 190,
+        status: "Normal Operational Baseline",
+        created_at: new Date().toISOString()
+      };
+      showToast(lang === 'kn' ? 'ಹಾರ್ಡ್‌ವೇರ್ ಸಂವೇದಕಗಳು ಸಾಮಾನ್ಯ ಸ್ಥಿತಿಗೆ ಮರಳಿವೆ' : 'Sensors Reset to Normal Baseline', 'success');
+    }
+
+    try {
+      await fetch('/api/telemetry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      setSensorData(prev => ({ ...prev, ...payload }));
+    } catch (err) {
+      console.error('Error posting demo telemetry:', err);
+    }
+  };
+
   const handleShowRoute = (request) => {
     const url = `https://router.project-osrm.org/route/v1/driving/${currentBaseLocation.lng},${currentBaseLocation.lat};${request.lng},${request.lat}?overview=full&geometries=geojson`;
 
@@ -1792,6 +1880,16 @@ export default function Home() {
               </div>
             </div>
             <div className="header-right">
+              <a
+                href="/resqlink_mobile_arm64.apk"
+                download="resqlink_mobile_arm64.apk"
+                className="btn btn-secondary btn-small"
+                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#1b4d2e', color: '#00ff88', border: '1px solid #2e7d32', textDecoration: 'none', fontWeight: 'bold' }}
+                title="Download Android Mobile Mesh APK (Google Nearby BLE + Wi-Fi Direct)"
+              >
+                <i className="fas fa-mobile-screen"></i>
+                <span>{lang === 'kn' ? 'ಮೊಬೈಲ್ APK ಡೌನ್‌ಲೋಡ್' : 'Download Mobile APK'}</span>
+              </a>
               <button
                 className="btn btn-secondary btn-small"
                 id="tacticalToggleAdmin"
@@ -2027,13 +2125,48 @@ export default function Home() {
                   <i className="fas fa-chevron-down" style={{ transform: isHardwareExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}></i>
                 </div>
                 <div className={`weather-content ${isHardwareExpanded ? 'expanded' : ''}`}>
+                  {/* Live Hardware Demo Simulation Control Strip */}
+                  <div style={{ padding: '10px 15px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                      <i className="fas fa-vial"></i> {lang === 'kn' ? 'ಹಾರ್ಡ್‌ವೇರ್ ಸಿಮ್ಯುಲೇಶನ್ / ಟ್ರಿಗ್ಗರ್‌ಗಳು:' : 'Hardware Demo Triggers:'}
+                    </span>
+                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleTriggerHardwareDemo('earthquake')} style={{ fontSize: '11px', padding: '4px 8px', background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a' }}>
+                      🚨 MPU6050 Quake
+                    </button>
+                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleTriggerHardwareDemo('flood')} style={{ fontSize: '11px', padding: '4px 8px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #7dd3fc' }}>
+                      🌊 HC-SR04 Flood
+                    </button>
+                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleTriggerHardwareDemo('cloudburst')} style={{ fontSize: '11px', padding: '4px 8px', background: '#e0f7fa', color: '#006064', border: '1px solid #80deea' }}>
+                      🌧️ Rain Storm
+                    </button>
+                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleTriggerHardwareDemo('gas')} style={{ fontSize: '11px', padding: '4px 8px', background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }}>
+                      💨 MQ-2 Smoke
+                    </button>
+                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleTriggerHardwareDemo('storm')} style={{ fontSize: '11px', padding: '4px 8px', background: '#f3e8ff', color: '#6b21a8', border: '1px solid #d8b4fe' }}>
+                      🌪️ BMP280 Gale
+                    </button>
+                    <button type="button" className="btn btn-secondary btn-small" onClick={() => handleTriggerHardwareDemo('reset')} style={{ fontSize: '11px', padding: '4px 8px', background: '#22c55e', color: '#fff', border: 'none' }}>
+                      🔄 Baseline Normal
+                    </button>
+                    <div style={{ marginLeft: 'auto', fontSize: '11px', color: '#555' }}>
+                      Status: <strong style={{ color: sensorData.status?.includes('CRITICAL') || sensorData.status?.includes('DANGER') || sensorData.status?.includes('WARNING') || sensorData.status?.includes('ALARM') ? '#ef4444' : '#16a34a' }}>{sensorData.status || 'Active'}</strong>
+                    </div>
+                  </div>
+
+                  {/* 12-Sensor Telemetry Grid */}
                   <div style={{ padding: '15px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
-                    <div className={`stat-card hw-card ${sensorData.temperature > 38.0 ? 'danger-alert-card' : ''}`} id="hwCardTemp"><div className="stat-content"><h3>{t.temp}</h3><div className="value">{sensorData.temperature}°C</div></div></div>
-                    <div className={`stat-card hw-card ${sensorData.humidity > 85.0 ? 'danger-alert-card' : ''}`} id="hwCardHum"><div className="stat-content"><h3>{t.hum}</h3><div className="value">{sensorData.humidity}%</div></div></div>
-                    <div className={`stat-card hw-card ${sensorData.seismic > 0.15 ? 'danger-alert-card' : ''}`} id="hwCardSeismic"><div className="stat-content"><h3>{t.seismic}</h3><div className="value">{sensorData.seismic} m/s²</div></div></div>
-                    <div className={`stat-card hw-card ${sensorData.water_level > 180.0 ? 'danger-alert-card' : ''}`} id="hwCardWater"><div className="stat-content"><h3>{t.water}</h3><div className="value">{sensorData.water_level}</div></div></div>
-                    <div className={`stat-card hw-card ${sensorData.soil_moisture > 3000 ? 'danger-alert-card' : ''}`} id="hwCardSoil"><div className="stat-content"><h3>{t.soil}</h3><div className="value">{sensorData.soil_moisture}</div></div></div>
-                    <div className={`stat-card hw-card ${sensorData.rain_level > 50 ? 'danger-alert-card' : ''}`} id="hwCardRain"><div className="stat-content"><h3>{t.rain}</h3><div className="value">{sensorData.rain_level}</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.temperature > 38.0 ? 'danger-alert-card' : ''}`} id="hwCardTemp"><div className="stat-content"><h3>{t.temp} (DHT11)</h3><div className="value">{sensorData.temperature}°C</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.humidity > 85.0 ? 'danger-alert-card' : ''}`} id="hwCardHum"><div className="stat-content"><h3>{t.hum} (DHT11)</h3><div className="value">{sensorData.humidity}%</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.seismic > 0.15 ? 'danger-alert-card' : ''}`} id="hwCardSeismic"><div className="stat-content"><h3>{t.seismic} (MPU6050)</h3><div className="value">{sensorData.seismic} m/s²</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.water_level > 180.0 ? 'danger-alert-card' : ''}`} id="hwCardWater"><div className="stat-content"><h3>{t.water} (HC-SR04)</h3><div className="value">{sensorData.water_level} cm</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.soil_moisture > 3000 ? 'danger-alert-card' : ''}`} id="hwCardSoil"><div className="stat-content"><h3>{t.soil} (Probe)</h3><div className="value">{sensorData.soil_moisture}</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.rain_level > 50 ? 'danger-alert-card' : ''}`} id="hwCardRain"><div className="stat-content"><h3>{t.rain} (Grid)</h3><div className="value">{sensorData.rain_level}</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.baro_pressure < 990.0 ? 'danger-alert-card' : ''}`} id="hwCardPressure"><div className="stat-content"><h3>{t.pressure || 'Pressure'} (BMP280)</h3><div className="value">{sensorData.baro_pressure || 1011.5} hPa</div></div></div>
+                    <div className="stat-card hw-card" id="hwCardAltitude"><div className="stat-content"><h3>{t.altitude || 'Altitude'} (BMP280)</h3><div className="value">{sensorData.altitude || 770.0} m</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.air_quality > 1000 ? 'danger-alert-card' : ''}`} id="hwCardAir"><div className="stat-content"><h3>{t.air || 'Air Quality'} (MQ-2)</h3><div className="value">{sensorData.air_quality || 180}</div></div></div>
+                    <div className={`stat-card hw-card ${sensorData.wind_speed > 60.0 ? 'danger-alert-card' : ''}`} id="hwCardWindSpeed"><div className="stat-content"><h3>{t.windSpeed || 'Wind Speed'}</h3><div className="value">{sensorData.wind_speed || 12.5} km/h</div></div></div>
+                    <div className="stat-card hw-card" id="hwCardWindDir"><div className="stat-content"><h3>{t.windDir || 'Wind Dir'}</h3><div className="value">{sensorData.wind_direction || 190}°</div></div></div>
+                    <div className="stat-card hw-card" id="hwCardLora" style={{ background: '#f0fdf4', border: '1px solid #86efac' }}><div className="stat-content"><h3>LoRa &amp; GPS</h3><div className="value" style={{ fontSize: '13px', color: '#15803d' }}>{sensorData.lora_node || 'LORA-NODE-01'} ({sensorData.lora_rssi || -68} dBm)</div></div></div>
                   </div>
                   <div style={{ padding: '0 15px 15px', fontSize: '10px', color: '#666', textAlign: 'right' }}>
                     {t.last_sync || 'Last Sync'}: {new Date(sensorData.created_at).toLocaleTimeString()}
@@ -2452,6 +2585,16 @@ export default function Home() {
               </div>
             </div>
             <div className="header-right">
+              <a
+                href="/resqlink_mobile_arm64.apk"
+                download="resqlink_mobile_arm64.apk"
+                className="btn btn-secondary btn-small"
+                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#1b4d2e', color: '#00ff88', border: '1px solid #2e7d32', textDecoration: 'none', fontWeight: 'bold' }}
+                title="Download Android Mobile Mesh APK (Google Nearby BLE + Wi-Fi Direct)"
+              >
+                <i className="fas fa-mobile-screen"></i>
+                <span>{lang === 'kn' ? 'ಮೊಬೈಲ್ APK ಡೌನ್‌ಲೋಡ್' : 'Download Mobile APK'}</span>
+              </a>
               <button
                 className="btn btn-secondary btn-small"
                 id="tacticalToggleUser"
@@ -2635,7 +2778,7 @@ export default function Home() {
                     </div>
                     <div className="hw-item" style={{ padding: '10px', background: sensorData.water_level > 180.0 ? '#fee2e2' : '#fff', color: sensorData.water_level > 180.0 ? '#991b1b' : 'inherit', border: sensorData.water_level > 180.0 ? '1px solid #ef4444' : 'none', borderRadius: '8px' }}>
                       <label style={{ fontSize: '11px' }}>{t.water}</label>
-                      <div style={{ fontWeight: 'bold' }}>{sensorData.water_level}</div>
+                      <div style={{ fontWeight: 'bold' }}>{sensorData.water_level} cm</div>
                     </div>
                     <div className="hw-item" style={{ padding: '10px', background: sensorData.soil_moisture > 3000 ? '#fee2e2' : '#fff', color: sensorData.soil_moisture > 3000 ? '#991b1b' : 'inherit', border: sensorData.soil_moisture > 3000 ? '1px solid #ef4444' : 'none', borderRadius: '8px' }}>
                       <label style={{ fontSize: '11px' }}>{t.soil}</label>
@@ -2644,6 +2787,30 @@ export default function Home() {
                     <div className="hw-item" style={{ padding: '10px', background: sensorData.rain_level > 50 ? '#fee2e2' : '#fff', color: sensorData.rain_level > 50 ? '#991b1b' : 'inherit', border: sensorData.rain_level > 50 ? '1px solid #ef4444' : 'none', borderRadius: '8px' }}>
                       <label style={{ fontSize: '11px' }}>{t.rain}</label>
                       <div style={{ fontWeight: 'bold' }}>{sensorData.rain_level}</div>
+                    </div>
+                    <div className="hw-item" style={{ padding: '10px', background: sensorData.baro_pressure < 990.0 ? '#fee2e2' : '#fff', color: sensorData.baro_pressure < 990.0 ? '#991b1b' : 'inherit', border: sensorData.baro_pressure < 990.0 ? '1px solid #ef4444' : 'none', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '11px' }}>{t.pressure || 'Pressure'}</label>
+                      <div style={{ fontWeight: 'bold' }}>{sensorData.baro_pressure || 1011.5} hPa</div>
+                    </div>
+                    <div className="hw-item" style={{ padding: '10px', background: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '11px' }}>{t.altitude || 'Altitude'}</label>
+                      <div style={{ fontWeight: 'bold' }}>{sensorData.altitude || 770.0} m</div>
+                    </div>
+                    <div className="hw-item" style={{ padding: '10px', background: sensorData.air_quality > 1000 ? '#fee2e2' : '#fff', color: sensorData.air_quality > 1000 ? '#991b1b' : 'inherit', border: sensorData.air_quality > 1000 ? '1px solid #ef4444' : 'none', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '11px' }}>{t.air || 'Air Quality'}</label>
+                      <div style={{ fontWeight: 'bold' }}>{sensorData.air_quality || 180}</div>
+                    </div>
+                    <div className="hw-item" style={{ padding: '10px', background: sensorData.wind_speed > 60.0 ? '#fee2e2' : '#fff', color: sensorData.wind_speed > 60.0 ? '#991b1b' : 'inherit', border: sensorData.wind_speed > 60.0 ? '1px solid #ef4444' : 'none', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '11px' }}>{t.windSpeed || 'Wind Speed'}</label>
+                      <div style={{ fontWeight: 'bold' }}>{sensorData.wind_speed || 12.5} km/h</div>
+                    </div>
+                    <div className="hw-item" style={{ padding: '10px', background: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '11px' }}>{t.windDir || 'Wind Dir'}</label>
+                      <div style={{ fontWeight: 'bold' }}>{sensorData.wind_direction || 190}°</div>
+                    </div>
+                    <div className="hw-item" style={{ padding: '10px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '11px', color: '#166534' }}>LoRa Node &amp; Signal</label>
+                      <div style={{ fontWeight: 'bold', fontSize: '11.5px', color: '#15803d' }}>{sensorData.lora_node || 'LORA-NODE-01'} ({sensorData.lora_rssi || -68} dBm)</div>
                     </div>
                   </div>
                 </div>

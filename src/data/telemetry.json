@@ -1,0 +1,19 @@
+{
+  "temperature": 24.5,
+  "humidity": 62.0,
+  "soil_moisture": 2100,
+  "water_level": 120.0,
+  "seismic": 0.05,
+  "air_quality": 180,
+  "rain_level": 0,
+  "baro_pressure": 1011.5,
+  "altitude": 770.0,
+  "wind_speed": 12.5,
+  "wind_direction": 190,
+  "latitude": 12.5118,
+  "longitude": 76.8851,
+  "lora_node": "LORA-NODE-01",
+  "lora_rssi": -68,
+  "status": "Online Active",
+  "created_at": "2026-11-25T17:00:00.000Z"
+}
