@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 
-export default function MapComponent({ lat, lng, name, requests, volunteers, onMapClick, selectedLocation, routeCoordinates, tacticalMode }) {
+export default function MapComponent({ lat, lng, name, requests, volunteers, onMapClick, selectedLocation, routeCoordinates }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -56,7 +56,7 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
     });
     baseMarkerRef.current = L.marker([lat, lng], { icon: baseIcon })
       .addTo(map)
-      .bindPopup(`<b>📡 ResQ Link Resource Depot (${name})</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}<br>Status: Active Depot`);
+      .bindPopup(`<b>📡 Suraksha Setu Resource Depot (${name})</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}<br>Status: Active Depot`);
 
     // 2. Clear old request, volunteer, and shelter markers
     markersRef.current.forEach(m => m.remove());
@@ -127,7 +127,7 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
     };
   }, [lat, lng, name, requests, volunteers, onMapClick]);
 
-  // Dynamic Map Theme based on Tactical Mode
+  // Standard OSM Map Tile Layer
   useEffect(() => {
     if (!mapRef.current) return;
     const L = require('leaflet');
@@ -136,16 +136,11 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
       tileLayerRef.current.remove();
     }
 
-    const tileUrl = tacticalMode
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-    const attribution = tacticalMode
-      ? '&copy; OpenStreetMap contributors &copy; CARTO'
-      : '&copy; OpenStreetMap contributors';
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const attribution = '&copy; OpenStreetMap contributors';
 
     tileLayerRef.current = L.tileLayer(tileUrl, { attribution }).addTo(mapRef.current);
-  }, [tacticalMode]);
+  }, []);
 
   // 7. Draw Selected Location Marker dynamically
   useEffect(() => {
@@ -182,35 +177,25 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
     }
 
     if (routeCoordinates && routeCoordinates.length > 0) {
-      if (tacticalMode) {
-        // Neon green glow line underneath
-        routeGlowRef.current = L.polyline(routeCoordinates, {
-          color: '#39ff14',
-          weight: 12,
-          opacity: 0.3
-        }).addTo(map);
-
-        // Core bright neon green line
-        routePolylineRef.current = L.polyline(routeCoordinates, {
-          color: '#39ff14',
-          weight: 5,
-          opacity: 1.0
-        }).addTo(map);
-      } else {
-        // Standard blue route line
-        routePolylineRef.current = L.polyline(routeCoordinates, {
-          color: '#2563eb',
-          weight: 5,
-          opacity: 0.8
-        }).addTo(map);
-      }
+      // Standard vibrant blue route line
+      routePolylineRef.current = L.polyline(routeCoordinates, {
+        color: '#2563eb',
+        weight: 5,
+        opacity: 0.85
+      }).addTo(map);
       map.fitBounds(routePolylineRef.current.getBounds(), { padding: [50, 50] });
     }
-  }, [routeCoordinates, tacticalMode]);
+  }, [routeCoordinates]);
 
   return (
-    <div style={{ height: '100%', width: '100%', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
-      <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
+    <div style={{ display: 'flex', flexDirection: 'row', height: '100%', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
+      {/* Map Container (90% split) */}
+      <div style={{ width: '90%', position: 'relative', minHeight: '400px', height: '100%' }}>
+        <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
+      </div>
+      
+      {/* Scroll Safe Zone (10% split - completely empty) */}
+      <div style={{ width: '10%', background: 'transparent' }} />
     </div>
   );
 }

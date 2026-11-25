@@ -118,7 +118,7 @@ const DUMMY_REQUESTS = [
 
 const TRANSLATIONS = {
   en: {
-    title: "ResQ Link",
+    title: "Suraksha Setu",
     base: "Base: VVCE Mysuru Emergency Operations Center",
     hw_title: "Live Hardware Monitoring ",
     temp: "Temperature",
@@ -157,7 +157,7 @@ const TRANSLATIONS = {
     active_req_short: "Active Requests",
     resolved_req_short: "Resolved Requests",
     critical_priority: "Critical Priority",
-    ai_assistant: "ResQLink AI Assistant",
+    ai_assistant: "Suraksha Setu AI Assistant",
     gen_report: "Generate Situation Report",
     ai_helper_text: "Click 'Generate Situation Report' to get an AI analysis of the current environment logs.",
     analyzing_data: "Analyzing data...",
@@ -192,7 +192,7 @@ const TRANSLATIONS = {
     demo_btn: "Use Demo Admin Credentials",
     dont_have_account: "Don't have an account? Register new account",
     disaster_mgmt: "Disaster Response Management System",
-    join_resq: "Join ResQ Link",
+    join_resq: "Join Suraksha Setu",
     create_account_sub: "Create your account to get started",
     account_security: "Account Security",
     confirm_password: "Confirm Password",
@@ -263,7 +263,7 @@ const TRANSLATIONS = {
     pin_target_required: "🚨 Pinned target coords required (Click Map)"
   },
   kn: {
-    title: "ರೆಸ್ಕ್ಯೂ ಲಿಂಕ್",
+    title: "ಸುರಕ್ಷಾ ಸೇತು",
     base: "ನೆಲೆ: ವಿವಿಇಸಿ ಮೈಸೂರು ತುರ್ತು ಕಾರ್ಯಾಚರಣೆ ಕೇಂದ್ರ",
     hw_title: "ಲೈವ್ ಹಾರ್ಡ್‌ವೇರ್ ಮಾನಿಟರಿಂಗ್ (ಸುಪಬೇಸ್)",
     temp: "ತಾಪಮಾನ",
@@ -302,7 +302,7 @@ const TRANSLATIONS = {
     active_req_short: "ಸಕ್ರಿಯ ವಿನಂತಿಗಳು",
     resolved_req_short: "ಪರಿಹರಿಸಲಾದ ವಿನಂತಿಗಳು",
     critical_priority: "ಗಂಭೀರ ಆದ್ಯತೆ",
-    ai_assistant: "ರೆಸ್ಕ್ಯೂಲಿಂಕ್ AI ಸಹಾಯಕಿ",
+    ai_assistant: "ಸುರಕ್ಷಾ ಸೇತು AI ಸಹಾಯಕಿ",
     gen_report: "ಪರಿಸ್ಥಿತಿ ವರದಿ ರಚಿಸಿ",
     ai_helper_text: "ಪ್ರಸ್ತುತ ಪರಿಸರದ ಲಾಗ್‌ಗಳ AI ವಿಶ್ಲೇಷಣೆಯನ್ನು ಪಡೆಯಲು 'ಪರಿಸ್ಥಿತಿ ವರದಿ ರಚಿಸಿ' ಕ್ಲಿಕ್ ಮಾಡಿ.",
     analyzing_data: "ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
@@ -337,7 +337,7 @@ const TRANSLATIONS = {
     demo_btn: "ಡೆಮೊ ನಿರ್ವಾಹಕ ರುಜುವಾತುಗಳನ್ನು ಬಳಸಿ",
     dont_have_account: "ಖಾತೆ ಇಲ್ಲವೇ? ಹೊಸದನ್ನು ರಚಿಸಿ",
     disaster_mgmt: "ವಿಪತ್ತು ಪ್ರತಿಕ್ರಿಯೆ ನಿರ್ವಹಣಾ ವ್ಯವಸ್ಥೆ",
-    join_resq: "ರೆಸ್ಕ್ಯೂ ಲಿಂಕ್ ಸೇರಿ",
+    join_resq: "ಸುರಕ್ಷಾ ಸೇತು ಸೇರಿ",
     create_account_sub: "ಪ್ರಾರಂಭಿಸಲು ನಿಮ್ಮ ಖಾತೆಯನ್ನು ರಚಿಸಿ",
     account_security: "ಖಾತೆ ಭದ್ರತೆ",
     confirm_password: "ದೃಢೀಕರಿಸಿ",
@@ -682,10 +682,10 @@ export default function Home() {
       try {
         const configResponse = await fetch('/api/config');
         const config = await configResponse.json();
-        
+
         const rawUrl = config.SUPABASE_URL || "https://roypndzefjunimxzvcnf.supabase.co";
         const key = config.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveXBuZHplZmp1bmlteHp2Y25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTgwNTMsImV4cCI6MjA5Mzc5NDA1M30.bxHGO-nOBEsTBDUg8WIVHRr3Qyxy0g1DxokvVOHqK18";
-        
+
         const supabaseUrl = `${rawUrl.replace(/\/$/, '')}/rest/v1/sensor_logs?select=*&order=created_at.desc&limit=1`;
 
         const response = await fetch(supabaseUrl, {
@@ -710,7 +710,7 @@ export default function Home() {
           const deltaWater = parseFloat(((Math.random() - 0.5) * 0.6).toFixed(2));
           const deltaSeismic = parseFloat(((Math.random() - 0.5) * 0.02).toFixed(4));
           const deltaAir = Math.round((Math.random() - 0.5) * 4);
-          
+
           return {
             ...prev,
             temperature: parseFloat((Math.max(10, Math.min(45, prev.temperature + deltaTemp))).toFixed(1)),
@@ -747,16 +747,16 @@ export default function Home() {
         const response = await fetch('https://docs.google.com/spreadsheets/d/10Tq6CAz9CBBOapmcSk9QXoVxuX0B7xmXxDE74F2CJpY/export?format=csv');
         if (!response.ok) throw new Error('Failed to fetch SMS data');
         const text = await response.text();
-        
+
         const rows = [];
         let currentRow = [];
         let currentCell = '';
         let inQuotes = false;
-        
+
         for (let i = 0; i < text.length; i++) {
           const char = text[i];
           if (char === '"') {
-            if (inQuotes && text[i+1] === '"') {
+            if (inQuotes && text[i + 1] === '"') {
               currentCell += '"';
               i++;
             } else {
@@ -778,7 +778,7 @@ export default function Home() {
           currentRow.push(currentCell.trim());
           rows.push(currentRow);
         }
-        
+
         if (rows.length > 0) {
           const headers = rows[0];
           const data = [];
@@ -974,7 +974,7 @@ export default function Home() {
   const sortedRequests = useMemo(() => {
     const active = requests.filter(r => r.status !== 'resolved');
     const resolved = requests.filter(r => r.status === 'resolved');
-    
+
     const sortFn = (a, b) => {
       if (riskSort === 'critical') {
         return (b.priorityScore || 0) - (a.priorityScore || 0);
@@ -1191,7 +1191,7 @@ export default function Home() {
     };
 
     setRequests(prev => prev.map(r => r.id === reqId ? updatedRequest : r));
-    
+
     // Select it for triage sidebar too to update UI
     if (selectedTriageRequest && selectedTriageRequest.id === reqId) {
       setSelectedTriageRequest(updatedRequest);
@@ -1209,7 +1209,7 @@ export default function Home() {
     }
 
     setDispatchingVolId(null);
-    
+
     // Draw route on map
     handleShowRoute(target);
   };
@@ -1218,11 +1218,11 @@ export default function Home() {
     const R = 6371; // km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
@@ -1278,7 +1278,7 @@ export default function Home() {
           triageSummary: data.triageSummary
         };
         setSelectedTriageRequest(updated);
-        
+
         // Also update requests state locally
         setRequests(prev => prev.map(r => r.id === req.id ? updated : r));
         showToast("AI Triage analysis complete!", "success");
@@ -1684,8 +1684,8 @@ export default function Home() {
   const getWeatherItems = (data) => {
     if (!data) return [];
     const windDirection = data.wind && data.wind.deg !== undefined
-        ? `${degToCardinal(data.wind.deg)} (${data.wind.deg}° ${t.from_north})`
-        : 'N/A';
+      ? `${degToCardinal(data.wind.deg)} (${data.wind.deg}° ${t.from_north})`
+      : 'N/A';
 
     return [
       { label: t.city_name, value: data.name || 'N/A' },
@@ -1723,12 +1723,14 @@ export default function Home() {
         <div id="authScreen" className="login-container">
           <div className="auth-wrapper">
             <div className={`auth-container ${showRegister ? 'show-register' : ''}`} id="authContainer">
-              
+
               {/* Logo Side Panel */}
               <div className="logo-panel">
                 <div className="logo-box">
-                  <img src="/logo.png" alt="ResQ Link Logo" />
-                  <h2>ResQ Link</h2>
+                  <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '3px solid rgba(255,255,255,0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+                    <i className="fas fa-shield-halved" style={{ fontSize: '42px', color: '#ffffff' }}></i>
+                  </div>
+                  <h2>Suraksha Setu</h2>
                   <p>Disaster Response Management System</p>
                 </div>
               </div>
@@ -1786,7 +1788,7 @@ export default function Home() {
                   </div>
                 ) : (
                   <div className="login-card" id="registerFormCard">
-                    <h1>Join ResQ Link</h1>
+                    <h1>Join Suraksha Setu</h1>
                     <p>{t.create_account_sub}</p>
                     <form onSubmit={handleRegisterSubmit}>
                       <div className="form-section-title">Account Security</div>
@@ -1847,7 +1849,7 @@ export default function Home() {
                       </div>
 
                       {regError && <div className="error-message" style={{ display: 'block' }}>{regError}</div>}
-                      
+
                       <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }}>
                         Create Account
                       </button>
@@ -1869,36 +1871,29 @@ export default function Home() {
       {/* 2. ADMIN DASHBOARD */}
       {currentUser && currentUser.role === 'Admin' && (
         <div id="adminDashboard" className="dashboard" style={{ display: 'block' }}>
-          
+
           {/* Header Panel */}
           <div className="header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <img src="/logo.png" alt="ResQ Link Logo" style={{ height: '80px', width: 'auto', borderRadius: '50%' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(37,99,235,0.3)' }}>
+                <i className="fas fa-shield-halved" style={{ fontSize: '26px', color: '#ffffff' }}></i>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <h1 style={{ margin: 0, fontSize: '48px', letterSpacing: '1px', lineHeight: '1.2' }}>{t.title}</h1>
-                <span style={{ fontSize: '20px', opacity: 0.9, fontWeight: 'normal' }}>{t.base}</span>
+                <h1 style={{ margin: 0, fontSize: '42px', letterSpacing: '1px', lineHeight: '1.2' }}>{t.title}</h1>
+                <span style={{ fontSize: '17px', opacity: 0.9, fontWeight: 'normal' }}>{t.base}</span>
               </div>
             </div>
             <div className="header-right">
               <a
                 href="/resqlink_mobile_arm64.apk"
-                download="resqlink_mobile_arm64.apk"
+                download="suraksha_setu_mobile_arm64.apk"
                 className="btn btn-secondary btn-small"
-                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#1b4d2e', color: '#00ff88', border: '1px solid #2e7d32', textDecoration: 'none', fontWeight: 'bold' }}
+                style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#1d4ed8', color: '#ffffff', border: '1px solid #3b82f6', textDecoration: 'none', fontWeight: 'bold', borderRadius: '8px', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
                 title="Download Android Mobile Mesh APK (Google Nearby BLE + Wi-Fi Direct)"
               >
                 <i className="fas fa-mobile-screen"></i>
                 <span>{lang === 'kn' ? 'ಮೊಬೈಲ್ APK ಡೌನ್‌ಲೋಡ್' : 'Download Mobile APK'}</span>
               </a>
-              <button
-                className="btn btn-secondary btn-small"
-                id="tacticalToggleAdmin"
-                onClick={() => setTacticalMode(prev => !prev)}
-                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: tacticalMode ? '#900' : '#333', color: tacticalMode ? '#fff' : '#00ff88', border: '1px solid #444' }}
-              >
-                <i className={tacticalMode ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-                <span>{tacticalMode ? t.normal_mode : t.tactical_mode}</span>
-              </button>
               <button
                 className="btn btn-secondary btn-small"
                 id="langToggleAdmin"
@@ -1916,7 +1911,7 @@ export default function Home() {
           </div>
 
           <div className="container">
-            
+
             {/* Top Stat Cards */}
             <div className="stats-grid" id="adminStatsGrid" style={{ display: 'grid', marginBottom: '24px' }}>
               <div className="stat-card">
@@ -1955,12 +1950,12 @@ export default function Home() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h2 style={{ margin: 0 }}><i className="fas fa-map-location-dot"></i> {t.command_map}</h2>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <button 
-                    className="btn btn-secondary btn-small" 
+                  <button
+                    className="btn btn-secondary btn-small"
                     onClick={handleAutoFetchGPS}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: '6px',
                       fontWeight: '600'
                     }}
@@ -1980,7 +1975,6 @@ export default function Home() {
                   onMapClick={handleMapClick}
                   selectedLocation={selectedLocation}
                   routeCoordinates={routeCoordinates}
-                  tacticalMode={tacticalMode}
                 />
               </div>
             </div>
@@ -2117,7 +2111,7 @@ export default function Home() {
 
             {/* Collapsible telemetry grids */}
             <div className="collapsible-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginBottom: '24px' }}>
-              
+
               {/* Sensor Card */}
               <div id="hardwareSection" className="weather-section" style={{ display: 'block' }}>
                 <div className="weather-header" onClick={() => setIsHardwareExpanded(prev => !prev)}>
@@ -2202,10 +2196,10 @@ export default function Home() {
 
             {/* Secondary Workspace for SMS, Volunteers, and AI Panel */}
             <div className="main-workspace" style={{ minHeight: 'auto', marginBottom: '24px', gridTemplateColumns: '2fr 1fr' }}>
-              
+
               {/* Left Column: Live SMS Requests and Volunteers */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                
+
                 {/* Live SMS Data from Google Sheets */}
                 <div className="section" style={{ margin: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
@@ -2272,13 +2266,13 @@ export default function Home() {
 
               {/* Right Column: AI Triage & Rescue Coordination Control Hub */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                
+
                 {/* 1. AI Incident Triage Panel */}
                 <div className="section" style={{ margin: 0 }}>
                   <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <i className="fas fa-brain" style={{ color: '#2f442f' }}></i> Disaster AI Triage Center
                   </h2>
-                  
+
                   {selectedTriageRequest ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' }}>
                       <div style={{ background: 'var(--color-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
@@ -2295,8 +2289,8 @@ export default function Home() {
                       </div>
 
                       {/* AI Action Trigger */}
-                      <button 
-                        className="btn btn-primary" 
+                      <button
+                        className="btn btn-primary"
                         disabled={aiTriageLoading}
                         onClick={() => handleRunAITriage(selectedTriageRequest)}
                         style={{ padding: '10px', fontSize: '13px', fontWeight: 'bold' }}
@@ -2326,9 +2320,9 @@ export default function Home() {
                           <div style={{ fontSize: '12px', color: '#333', borderTop: '1px solid #ccd6c8', paddingTop: '8px', lineHeight: '1.4' }}>
                             <strong>AI Action Directive:</strong> {selectedTriageRequest.triageSummary || "No summary generated."}
                           </div>
-                          
+
                           {/* Save Triage to Database */}
-                          <button 
+                          <button
                             className="btn btn-secondary btn-small"
                             onClick={() => handleSaveAITriage(selectedTriageRequest)}
                             style={{ width: '100%', marginTop: '10px', padding: '6px', fontSize: '11px', fontWeight: 'bold' }}
@@ -2352,7 +2346,7 @@ export default function Home() {
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <i className="fas fa-map-marked-alt" style={{ color: '#2f442f' }}></i> Smart Rescuer Matchmaking
                     </h2>
-                    
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
                       <div style={{ fontSize: '12px', color: '#666' }}>
                         Active rescuers ranked by distance to <strong>{selectedTriageRequest.requestId}</strong>:
@@ -2377,11 +2371,11 @@ export default function Home() {
                         rankedVolunteers.sort((a, b) => a.distance - b.distance);
 
                         return rankedVolunteers.map(vol => (
-                          <div 
-                            key={vol.id} 
-                            style={{ 
-                              padding: '10px', 
-                              borderRadius: '8px', 
+                          <div
+                            key={vol.id}
+                            style={{
+                              padding: '10px',
+                              borderRadius: '8px',
                               border: vol.isSkillMatch ? '2px solid #3a6841' : '1px solid var(--color-border)',
                               background: vol.status === 'busy' ? '#f4f4f4' : (vol.isSkillMatch ? '#f0f5f0' : 'var(--color-surface)'),
                               display: 'flex',
@@ -2399,9 +2393,9 @@ export default function Home() {
                               <span>Role: {vol.role}</span>
                               <span className={`status-badge status-${vol.status}`} style={{ fontSize: '9px' }}>{vol.status}</span>
                             </div>
-                            
+
                             {vol.status !== 'busy' && (
-                              <button 
+                              <button
                                 className="btn btn-primary btn-small"
                                 onClick={() => handleDispatchVolunteer(vol.id, selectedTriageRequest.id)}
                                 style={{ width: '100%', marginTop: '4px', fontSize: '11px', padding: '4px', fontWeight: 'bold' }}
@@ -2422,16 +2416,16 @@ export default function Home() {
                     <i className="fas fa-bullhorn" style={{ color: '#2f442f' }}></i> HQ Emergency Broadcasts
                   </h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' }}>
-                    <textarea 
+                    <textarea
                       className="form-control"
                       placeholder="Enter emergency warning to broadcast back to offline mobile mesh..."
                       value={newBroadcastMsg}
                       onChange={(e) => setNewBroadcastMsg(e.target.value)}
                       style={{ width: '100%', minHeight: '60px', padding: '10px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid var(--color-border)' }}
                     />
-                    
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <select 
+                      <select
                         className="form-control"
                         value={broadcastZone}
                         onChange={(e) => setBroadcastZone(e.target.value)}
@@ -2443,8 +2437,8 @@ export default function Home() {
                         <option value="Sector C">Sector C</option>
                         <option value="Sector D">Sector D</option>
                       </select>
-                      
-                      <select 
+
+                      <select
                         className="form-control"
                         value={broadcastSeverity}
                         onChange={(e) => setBroadcastSeverity(e.target.value)}
@@ -2456,7 +2450,7 @@ export default function Home() {
                       </select>
                     </div>
 
-                    <button 
+                    <button
                       className="btn btn-primary"
                       onClick={handleSendEmergencyBroadcast}
                       style={{ padding: '8px', fontSize: '13px', fontWeight: 'bold' }}
@@ -2469,11 +2463,11 @@ export default function Home() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid #ccd6c8', paddingTop: '10px', marginTop: '5px' }}>
                         <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#2d3b2e' }}>Recent Warnings:</div>
                         {broadcasts.map(bc => (
-                          <div 
-                            key={bc.id} 
-                            style={{ 
-                              padding: '8px', 
-                              borderRadius: '6px', 
+                          <div
+                            key={bc.id}
+                            style={{
+                              padding: '8px',
+                              borderRadius: '6px',
                               background: bc.severity === 'critical' ? '#ffebeb' : (bc.severity === 'warning' ? '#fff4e5' : '#f0f5f0'),
                               borderLeft: `4px solid ${bc.severity === 'critical' ? '#ef4444' : (bc.severity === 'warning' ? '#f59e0b' : '#3a6841')}`,
                               fontSize: '11.5px'
@@ -2574,36 +2568,29 @@ export default function Home() {
       {/* 3. USER DASHBOARD */}
       {currentUser && currentUser.role === 'User' && (
         <div id="userDashboard" className="dashboard" style={{ display: 'block' }}>
-          
+
           {/* Header */}
           <div className="header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <img src="/logo.png" alt="ResQ Link Logo" style={{ height: '80px', width: 'auto', borderRadius: '50%' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(37,99,235,0.3)' }}>
+                <i className="fas fa-shield-halved" style={{ fontSize: '26px', color: '#ffffff' }}></i>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <h1 style={{ margin: 0, fontSize: '48px', letterSpacing: '1px', lineHeight: '1.2' }}>{t.title}</h1>
-                <span style={{ fontSize: '20px', opacity: 0.9, fontWeight: 'normal' }}>{t.base}</span>
+                <h1 style={{ margin: 0, fontSize: '42px', letterSpacing: '1px', lineHeight: '1.2' }}>{t.title}</h1>
+                <span style={{ fontSize: '17px', opacity: 0.9, fontWeight: 'normal' }}>{t.base}</span>
               </div>
             </div>
             <div className="header-right">
               <a
                 href="/resqlink_mobile_arm64.apk"
-                download="resqlink_mobile_arm64.apk"
+                download="suraksha_setu_mobile_arm64.apk"
                 className="btn btn-secondary btn-small"
-                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#1b4d2e', color: '#00ff88', border: '1px solid #2e7d32', textDecoration: 'none', fontWeight: 'bold' }}
+                style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#1d4ed8', color: '#ffffff', border: '1px solid #3b82f6', textDecoration: 'none', fontWeight: 'bold', borderRadius: '8px', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
                 title="Download Android Mobile Mesh APK (Google Nearby BLE + Wi-Fi Direct)"
               >
                 <i className="fas fa-mobile-screen"></i>
                 <span>{lang === 'kn' ? 'ಮೊಬೈಲ್ APK ಡೌನ್‌ಲೋಡ್' : 'Download Mobile APK'}</span>
               </a>
-              <button
-                className="btn btn-secondary btn-small"
-                id="tacticalToggleUser"
-                onClick={() => setTacticalMode(prev => !prev)}
-                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: tacticalMode ? '#900' : '#333', color: tacticalMode ? '#fff' : '#ff0000', border: '1px solid #444' }}
-              >
-                <i className={tacticalMode ? "fas fa-eye-slash" : "fas fa-eye"}></i>
-                <span>{tacticalMode ? 'Normal Mode' : 'Tactical Mode'}</span>
-              </button>
               <button
                 className="btn btn-secondary btn-small"
                 id="langToggleUser"
@@ -2630,7 +2617,7 @@ export default function Home() {
 
           <div className="container">
             <div className="main-workspace" style={{ marginBottom: '24px' }}>
-              
+
               {/* User map coordinate picker */}
               <div className="map-section">
                 <h2><i className="fas fa-map-marked-alt"></i> {t.location_map}</h2>
@@ -2644,14 +2631,13 @@ export default function Home() {
                     onMapClick={handleMapClick}
                     selectedLocation={selectedLocation}
                     routeCoordinates={routeCoordinates}
-                    tacticalMode={tacticalMode}
                   />
                 </div>
               </div>
 
               {/* User input emergency trigger panel */}
               <div className="form-section">
-                
+
                 {/* Panic SOS Button */}
                 <div className="sos-container">
                   <button className="btn-sos" onClick={handleSOSPanic}>
@@ -2663,7 +2649,7 @@ export default function Home() {
                 </div>
 
                 <h2>{t.submit_req}</h2>
-                
+
                 {/* Dynamic ML Score Box */}
                 <div className="priority-display" id="userPriorityDisplay" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gridTemplateRows: 'auto auto', gap: '0px', alignItems: 'center' }}>
                   <h3 style={{ margin: 0 }}>Real-time ML Priority</h3>
@@ -2733,7 +2719,7 @@ export default function Home() {
 
             {/* Weather / Sensors / Volunteers Accordions */}
             <div className="sections-grid" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              
+
               {/* Weather info */}
               <div className="weather-section" id="userWeatherSection">
                 <div className="weather-header" onClick={() => setIsWeatherExpanded(prev => !prev)}>
@@ -2958,8 +2944,8 @@ export default function Home() {
               </div>
             </div>
             <div className="btn-group" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 style={{ flex: 1, height: '50px', fontSize: '16px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 onClick={() => {
                   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentBaseLocation.lat},${currentBaseLocation.lng}&destination=${routeData.lat},${routeData.lng}`;
@@ -3061,7 +3047,7 @@ export default function Home() {
               <div style={{ marginBottom: '15px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
                 {t.dispatch_desc || "Select a request from the active list below to dispatch the volunteer to that specific location."}
               </div>
-              
+
               {activeRequests.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '30px', color: 'var(--color-text-secondary)' }}>
                   {t.no_pending_requests || "No active requests available to dispatch volunteers to."}
@@ -3098,7 +3084,7 @@ export default function Home() {
                             </span>
                           </td>
                           <td>
-                            <button 
+                            <button
                               className="btn btn-primary btn-small"
                               onClick={() => handleDispatchVolunteer(dispatchingVolId, req.id)}
                             >
@@ -3111,7 +3097,7 @@ export default function Home() {
                   </table>
                 </div>
               )}
-              
+
               <div className="modal-footer" style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
                 <button className="btn btn-secondary" onClick={() => setDispatchingVolId(null)}>
                   {t.cancel || "Cancel"}

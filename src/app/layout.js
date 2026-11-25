@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "ResQ Link - Disaster Response System",
-  description: "A Centralized, Real-Time Hardware-to-Cloud Disaster Resource Management System & Tactical Command Center",
+  title: "Suraksha Setu - Disaster Response System",
+  description: "A Centralized, Real-Time Hardware-to-Cloud Disaster Resource Management System & Command Center",
 };
 
 export default function RootLayout({ children }) {
