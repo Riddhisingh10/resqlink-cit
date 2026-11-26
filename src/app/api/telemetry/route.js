@@ -15,9 +15,9 @@ const DEFAULT_TELEMETRY = {
   altitude: 770.0,
   wind_speed: 12.5,
   wind_direction: 190,
-  latitude: 12.5118,
-  longitude: 76.8851,
-  lora_node: "LORA-NODE-01",
+  latitude: 13.297336,
+  longitude: 77.165128,
+  lora_node: "DISASTER-NODE-CURRENT",
   lora_rssi: -68,
   status: "Online Active",
   created_at: new Date().toISOString()

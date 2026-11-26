@@ -6,8 +6,8 @@ const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false });
 
 const CREDENTIALS = {
   admin: { username: "1", password: "1", role: "Admin", fullName: "Govt Official" },
-  user: { username: "2", password: "2", role: "User", fullName: "On-Duty Officer" },
-  volunteer: { username: "3", password: "3", role: "Volunteer", fullName: "Field Volunteer" }
+  user: { username: "2", password: "2", role: "User", fullName: "Victim Portal" },
+  volunteer: { username: "3", password: "3", role: "Volunteer", fullName: "Field Rescuer" }
 };
 
 const VOLUNTEER_SPECIALTIES = [
@@ -27,7 +27,7 @@ const VOLUNTEER_SPECIALTIES = [
     value: "NCC/NSS Cadet",
     label: "NCC / NSS Cadet",
     docLabel: "Official NCC / NSS Cadet ID Card or Unit Certificate",
-    docHint: "Upload NCC C-Certificate, Battalion ID, or NSS Unit Volunteer Card (JPG, PNG, or PDF)"
+    docHint: "Upload NCC C-Certificate, Battalion ID, or NSS Unit Rescuer Card (JPG, PNG, or PDF)"
   },
   {
     value: "Paramedic / EMT",
@@ -48,10 +48,10 @@ const VOLUNTEER_SPECIALTIES = [
     docHint: "Upload valid Transport/Heavy Driving License or Ambulance Operator ID (JPG, PNG, or PDF)"
   },
   {
-    value: "Civil Volunteer",
-    label: "Civil Defense / General Volunteer",
-    docLabel: "Government Photo ID / Civil Defense Volunteer Pass",
-    docHint: "Upload Government ID or District Civil Defense Volunteer Pass (JPG, PNG, or PDF)"
+    value: "Civil Rescuer",
+    label: "Civil Defense / General Rescuer",
+    docLabel: "Government Photo ID / Civil Defense Rescuer Pass",
+    docHint: "Upload Government ID or District Civil Defense Rescuer Pass (JPG, PNG, or PDF)"
   }
 ];
 
@@ -67,10 +67,22 @@ const DEFAULT_RESOURCES = [
   { id: 9, name: "Heavy Duty Excavators (JCB)", type: "Heavy Machinery", totalQuantity: 15, availableQuantity: 10 }
 ];
 
+const HEAD_OFFICE_LOCATION = {
+  lat: 12.3275,
+  lng: 76.6133,
+  name: "Govt Official Head Office (VVCE Mysuru)"
+};
+
+const DEFAULT_DISASTER_LOCATION = {
+  lat: 13.297336,
+  lng: 77.165128,
+  source: "Current Disaster Zone"
+};
+
 const DEFAULT_VOLUNTEERS = [
-  { id: 1, name: "Dr. Sandeep", role: "Medical", status: "available", lat: 12.5318, lng: 76.9051, phone: "9123456780" },
-  { id: 2, name: "Kiran Kumar", role: "Rescue", status: "busy", lat: 12.5118, lng: 76.9151, phone: "9123456781" },
-  { id: 3, name: "Arjun Singh", role: "Driver", status: "available", lat: 12.5418, lng: 76.8851, phone: "9123456782" }
+  { id: 1, name: "Dr. Sandeep", role: "Medical", status: "available", lat: 13.3012, lng: 77.1695, phone: "9123456780" },
+  { id: 2, name: "Kiran Kumar", role: "Rescue", status: "busy", lat: 13.2948, lng: 77.1712, phone: "9123456781" },
+  { id: 3, name: "Arjun Singh", role: "Driver", status: "available", lat: 13.3035, lng: 77.1618, phone: "9123456782" }
 ];
 
 const DUMMY_REQUESTS = [
@@ -81,14 +93,14 @@ const DUMMY_REQUESTS = [
     quantityRequested: 150,
     quantityAllocated: 100,
     quantityPending: 50,
-    lat: 12.5118,
-    lng: 76.8851,
+    lat: 13.2973,
+    lng: 77.1651,
     severity: 5,
     individualsAffected: 200,
     status: "partial",
     contactPerson: "Dr. Ramesh Sharma",
     contactPhone: "9876543210",
-    address: "Near Mandya Railway Station, Mandya",
+    address: "Current Disaster Sector A (Primary Impact Zone)",
     description: "Critical medical supplies needed urgently for cyclone victims. Require emergency medicines, first aid kits, and antiseptics. Multiple injuries reported."
   },
   {
@@ -98,14 +110,14 @@ const DUMMY_REQUESTS = [
     quantityRequested: 500,
     quantityAllocated: 0,
     quantityPending: 500,
-    lat: 12.5318,
-    lng: 76.9051,
+    lat: 13.3015,
+    lng: 77.1692,
     severity: 4,
     individualsAffected: 100,
     status: "pending",
     contactPerson: "Rajesh Kumar",
     contactPhone: "9876543211",
-    address: "MIMS Doctors Quarters, Mandya",
+    address: "Current Disaster Relief Shelter B",
     description: "Emergency food supplies and clean drinking water needed for evacuees at temporary shelter. Families include elderly and children requiring immediate assistance."
   },
   {
@@ -115,14 +127,14 @@ const DUMMY_REQUESTS = [
     quantityRequested: 30,
     quantityAllocated: 30,
     quantityPending: 0,
-    lat: 12.5418,
-    lng: 76.9051,
+    lat: 13.3042,
+    lng: 77.1618,
     severity: 3,
     individualsAffected: 50,
     status: "allocated",
     contactPerson: "Priya Nair",
     contactPhone: "9876543212",
-    address: "Temple Road, Mandya",
+    address: "Current Disaster Zone Ward C",
     description: "Temporary shelter tents required for displaced families whose homes were damaged in heavy rains. Need waterproof tents with basic amenities."
   },
   {
@@ -132,14 +144,14 @@ const DUMMY_REQUESTS = [
     quantityRequested: 5,
     quantityAllocated: 5,
     quantityPending: 0,
-    lat: 12.5018,
-    lng: 76.8951,
+    lat: 13.2938,
+    lng: 77.1635,
     severity: 5,
     individualsAffected: 25,
     status: "resolved",
     contactPerson: "Mohammed Ali",
     contactPhone: "9876543213",
-    address: "Near Mandya Bus Stand, Mandya",
+    address: "Near Central Junction (Disaster Sector D)",
     description: "Emergency medical transport needed for critical patients. Several casualties with severe injuries requiring immediate hospital admission and specialized care.",
     resolvedAt: "2026-05-22T10:30:00Z"
   },
@@ -150,14 +162,14 @@ const DUMMY_REQUESTS = [
     quantityRequested: 10,
     quantityAllocated: 0,
     quantityPending: 10,
-    lat: 12.5218,
-    lng: 76.9251,
+    lat: 13.2958,
+    lng: 77.1714,
     severity: 4,
     individualsAffected: 80,
     status: "pending",
     contactPerson: "Anil Verma",
     contactPhone: "9876543214",
-    address: "Industrial Area, Mandya",
+    address: "Low-Lying Sector E (Current Disaster Zone)",
     description: "Rescue operation urgently needed for people stranded in flooded area. Water level rising rapidly. Require boats and trained rescue personnel immediately."
   }
 ];
@@ -165,7 +177,7 @@ const DUMMY_REQUESTS = [
 const TRANSLATIONS = {
   en: {
     title: "Suraksha Setu",
-    base: "Base: VVCE Mysuru Emergency Operations Center",
+    base: "Head Office: Govt Official HQ, VVCE Mysuru",
     hw_title: "Live Hardware Monitoring ",
     temp: "Temperature",
     hum: "Humidity",
@@ -191,11 +203,11 @@ const TRANSLATIONS = {
     active_req: "Active Emergency Requests",
     resolved_req: "Resolved Requests",
     avail_res: "Available Resources",
-    join_vol: "Join as a Volunteer",
+    join_vol: "Join as a Rescuer",
     name: "Full Name",
     expertise: "Expertise",
     phone: "Phone Number",
-    reg_vol: "Register as Volunteer",
+    reg_vol: "Register as Rescuer",
     avail_supplies: "Available Supplies",
     normal_mode: "Normal Mode",
     tactical_mode: "Tactical Mode",
@@ -221,7 +233,7 @@ const TRANSLATIONS = {
     timezone: "Timezone",
     location_map: "Emergency Location Map",
     submit_req_admin: "Submit Emergency Request (Govt Official)",
-    on_duty_vols: "On-Duty Volunteers",
+    on_duty_vols: "On-Duty Rescuers",
     sys_analytics: "System Analytics & Predictions",
     resolved_history: "Resolved Requests History",
     local_weather: "Local Weather",
@@ -292,10 +304,10 @@ const TRANSLATIONS = {
     from_north: "from North",
     units: "units",
     dispatch_title: "Select Incident Request for Dispatch",
-    dispatch_desc: "Select a request from the active list below to dispatch the volunteer to that specific location.",
+    dispatch_desc: "Select a request from the active list below to dispatch the rescuer to that specific location.",
     what: "What Needed",
     where: "Where (Location / Address)",
-    no_pending_requests: "No active requests available to dispatch volunteers to.",
+    no_pending_requests: "No active requests available to dispatch rescuers to.",
     exhaustion_forecast: "Inventory Exhaustion Forecast",
     hrs_left: "hrs left",
     burn_rate: "Burn Rate",
@@ -336,11 +348,11 @@ const TRANSLATIONS = {
     active_req: "ಸಕ್ರಿಯ ತುರ್ತು ವಿನಂತಿಗಳು",
     resolved_req: "ಪರಿಹರಿಸಲಾದ ವಿನಂತಿಗಳು",
     avail_res: "ಲಭ್ಯವಿರುವ ಸಂಪನ್ಮೂಲಗಳು",
-    join_vol: "ಸ್ವಯಂಸೇವಕರಾಗಿ ಸೇರಿ",
+    join_vol: "ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿಯಾಗಿ ಸೇರಿ",
     name: "ಪೂರ್ಣ ಹೆಸರು",
     expertise: "ಪರಿಣತಿ",
     phone: "ದೂರವಾಣಿ ಸಂಖ್ಯೆ",
-    reg_vol: "ಸ್ವಯಂಸೇವಕರಾಗಿ ನೋಂದಾಯಿಸಿ",
+    reg_vol: "ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿಯಾಗಿ ನೋಂದಾಯಿಸಿ",
     avail_supplies: "ಲಭ್ಯವಿರುವ ಸರಬರಾಜುಗಳು",
     normal_mode: "ಸಾಮಾನ್ಯ ಮೋಡ್",
     tactical_mode: "ಯುದ್ಧತಂತ್ರದ ಮೋಡ್",
@@ -366,7 +378,7 @@ const TRANSLATIONS = {
     timezone: "ಸಮಯ ವಲಯ",
     location_map: "ತುರ್ತು ಸ್ಥಳ ನಕ್ಷೆ",
     submit_req_admin: "ತುರ್ತು ವಿನಂತಿ ಸಲ್ಲಿಸಿ (ಸರ್ಕಾರಿ ಅಧಿಕಾರಿ)",
-    on_duty_vols: "ಕರ್ತವ್ಯದಲ್ಲಿರುವ ಸ್ವಯಂಸೇವಕರು",
+    on_duty_vols: "ಕರ್ತವ್ಯದಲ್ಲಿರುವ ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿ",
     sys_analytics: "ವ್ಯವಸ್ಥೆ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಮುನ್ಸೂಚನೆಗಳು",
     resolved_history: "ಪರಿಹರಿಸಲಾದ ವಿನಂತಿಗಳ ಇತಿಹಾಸ",
     local_weather: "ಸ್ಥಳೀಯ ಹವಾಮಾನ",
@@ -437,10 +449,10 @@ const TRANSLATIONS = {
     from_north: "ಉತ್ತರದಿಂದ",
     units: "ಘಟಕಗಳು",
     dispatch_title: "ನಿಯೋಜನೆಗಾಗಿ ಘಟನೆ ವಿನಂತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
-    dispatch_desc: "ಸ್ವಯಂಸೇವಕರನ್ನು ಆ ನಿರ್ದಿಷ್ಟ ಸ್ಥಳಕ್ಕೆ ನಿಯೋಜಿಸಲು ಕೆಳಗಿನ ಸಕ್ರಿಯ ಪಟ್ಟಿಯಿಂದ ವಿನಂತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    dispatch_desc: "ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿಯನ್ನು ಆ ನಿರ್ದಿಷ್ಟ ಸ್ಥಳಕ್ಕೆ ನಿಯೋಜಿಸಲು ಕೆಳಗಿನ ಸಕ್ರಿಯ ಪಟ್ಟಿಯಿಂದ ವಿನಂತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
     what: "ಏನು ಬೇಕಾಗಿದೆ",
     where: "ಎಲ್ಲಿ (ಸ್ಥಳ / ವಿಳಾಸ)",
-    no_pending_requests: "ಸ್ವಯಂಸೇವಕರನ್ನು ನಿಯೋಜಿಸಲು ಯಾವುದೇ ಸಕ್ರಿಯ ವಿನಂತಿಗಳು ಲಭ್ಯವಿಲ್ಲ.",
+    no_pending_requests: "ರಕ್ಷಣಾ ಸಿಬ್ಬಂದಿಯನ್ನು ನಿಯೋಜಿಸಲು ಯಾವುದೇ ಸಕ್ರಿಯ ವಿನಂತಿಗಳು ಲಭ್ಯವಿಲ್ಲ.",
     exhaustion_forecast: "ದಾಸ್ತಾನು ಖಾಲಿಯಾಗುವ ಮುನ್ಸೂಚನೆ",
     hrs_left: "ಗಂಟೆಗಳು ಬಾಕಿ",
     burn_rate: "ಬಳಕೆಯ ದರ",
@@ -490,6 +502,7 @@ export default function Home() {
 
   // Map & Location State
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [currentDisasterLocation, setCurrentDisasterLocation] = useState(DEFAULT_DISASTER_LOCATION);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeData, setRouteData] = useState(null);
   const [showRouteModal, setShowRouteModal] = useState(false);
@@ -595,17 +608,45 @@ export default function Home() {
 
   // 1. Initial Load & Setup
   useEffect(() => {
-    // Restore User Session
+    // Restore User Session (with dedicated defaults: port 3000 -> Govt Official, port 3001 -> Rescuer/Volunteer Portal)
+    const currentPort = typeof window !== 'undefined' ? window.location.port : '';
+    const explicitlyLoggedOut = typeof window !== 'undefined' && sessionStorage.getItem('surakshaExplicitLogout') === '1';
     const savedUser = localStorage.getItem('drmsCurrentUser');
+    let resolvedUser = null;
+
     if (savedUser) {
       try {
         const userObj = JSON.parse(savedUser);
-        setTimeout(() => {
-          setCurrentUser(userObj);
-        }, 0);
+        if (userObj && userObj.fullName === 'On-Duty Officer') {
+          userObj.fullName = 'Victim Portal';
+          localStorage.setItem('drmsCurrentUser', JSON.stringify(userObj));
+        }
+        if (currentPort === '3001') {
+          if (userObj && userObj.role === 'Volunteer') {
+            resolvedUser = userObj;
+          }
+        } else {
+          resolvedUser = userObj;
+        }
       } catch (e) {
         localStorage.removeItem('drmsCurrentUser');
       }
+    }
+
+    if (!resolvedUser && !explicitlyLoggedOut) {
+      if (currentPort === '3001') {
+        resolvedUser = CREDENTIALS.volunteer;
+        localStorage.setItem('drmsCurrentUser', JSON.stringify(CREDENTIALS.volunteer));
+      } else if (currentPort === '3000') {
+        resolvedUser = CREDENTIALS.admin;
+        localStorage.setItem('drmsCurrentUser', JSON.stringify(CREDENTIALS.admin));
+      }
+    }
+
+    if (resolvedUser) {
+      setTimeout(() => {
+        setCurrentUser(resolvedUser);
+      }, 0);
     }
 
     const savedVolunteerProfile = localStorage.getItem('surakshaVolunteerProfile');
@@ -744,25 +785,30 @@ export default function Home() {
     localStorage.setItem('mobileViewActive', mobileView);
   }, [mobileView]);
 
-  // Sync base position for map and fetch weather
-  const currentBaseLocation = useMemo(() => {
-    if (sensorData.latitude && sensorData.longitude) {
-      return {
-        lat: sensorData.latitude,
-        lng: sensorData.longitude,
-        name: "Dynamic Telemetry Node"
-      };
-    }
-    return {
-      lat: 12.3275,
-      lng: 76.6133,
-      name: "VVCE-MYS"
-    };
-  }, [sensorData.latitude, sensorData.longitude]);
+  // Govt Official Head Office remains anchored in Mysuru; disaster location tracks live current GPS
+  const currentBaseLocation = HEAD_OFFICE_LOCATION;
 
   useEffect(() => {
-    fetchWeather(currentBaseLocation.lat, currentBaseLocation.lng);
-  }, [currentBaseLocation, lang]);
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentDisasterLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            source: 'Live GPS Current Location'
+          });
+        },
+        () => {
+          // Keep current area baseline coordinates if GPS permission is denied or unavailable
+        },
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWeather(currentDisasterLocation.lat, currentDisasterLocation.lng);
+  }, [currentDisasterLocation, lang]);
 
   // 2. Live Hardware Data Polling (Direct /api/telemetry or Supabase REST API)
   useEffect(() => {
@@ -1070,6 +1116,7 @@ export default function Home() {
             lng: position.coords.longitude
           };
           setSelectedLocation(latlng);
+          setCurrentDisasterLocation({ ...latlng, source: 'Live GPS Current Location' });
         },
         (error) => {
           console.error("GPS Error:", error);
@@ -1109,12 +1156,15 @@ export default function Home() {
     const password = passwordInput;
 
     if (username === CREDENTIALS.admin.username && password === CREDENTIALS.admin.password) {
+      sessionStorage.removeItem('surakshaExplicitLogout');
       setCurrentUser(CREDENTIALS.admin);
       localStorage.setItem('drmsCurrentUser', JSON.stringify(CREDENTIALS.admin));
     } else if (username === CREDENTIALS.user.username && password === CREDENTIALS.user.password) {
+      sessionStorage.removeItem('surakshaExplicitLogout');
       setCurrentUser(CREDENTIALS.user);
       localStorage.setItem('drmsCurrentUser', JSON.stringify(CREDENTIALS.user));
     } else if (username === CREDENTIALS.volunteer.username && password === CREDENTIALS.volunteer.password) {
+      sessionStorage.removeItem('surakshaExplicitLogout');
       const freshProfile = {
         id: null,
         name: '',
@@ -1155,6 +1205,9 @@ export default function Home() {
   };
 
   const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('surakshaExplicitLogout', '1');
+    }
     setCurrentUser(null);
     localStorage.removeItem('drmsCurrentUser');
     localStorage.removeItem('surakshaVolunteerProfile');
@@ -1176,30 +1229,6 @@ export default function Home() {
   const fillDemoCredentials = (user = '1', pass = '1') => {
     setUsernameInput(user);
     setPasswordInput(pass);
-  };
-
-  const handleSelectExistingVolunteer = (vol) => {
-    const restoredProfile = {
-      id: vol.id,
-      name: vol.name,
-      phone: vol.phone || 'N/A',
-      specialty: vol.specialty || vol.role || 'Volunteer',
-      docNumber: vol.docNumber || '',
-      docFileName: vol.docFileName || 'Verified on file',
-      docFileSize: '',
-      isVerified: true,
-      verifiedAt: vol.verifiedAt || new Date().toISOString()
-    };
-    setVolunteerProfile(restoredProfile);
-    localStorage.setItem('surakshaVolunteerProfile', JSON.stringify(restoredProfile));
-
-    const updatedUser = {
-      ...CREDENTIALS.volunteer,
-      fullName: `${restoredProfile.name} (${restoredProfile.specialty})`
-    };
-    setCurrentUser(updatedUser);
-    localStorage.setItem('drmsCurrentUser', JSON.stringify(updatedUser));
-    showToast(`Welcome back, ${restoredProfile.name}! Viewing your personal dispatch dashboard.`, 'success');
   };
 
   const handleVolunteerVerifySubmit = async (e) => {
@@ -1233,8 +1262,8 @@ export default function Home() {
       verified: true,
       verifiedAt: new Date().toISOString(),
       status: existingVol ? existingVol.status : 'available',
-      lat: existingVol ? existingVol.lat : currentBaseLocation.lat + (Math.random() - 0.5) * 0.02,
-      lng: existingVol ? existingVol.lng : currentBaseLocation.lng + (Math.random() - 0.5) * 0.02
+      lat: existingVol ? existingVol.lat : currentDisasterLocation.lat + (Math.random() - 0.5) * 0.02,
+      lng: existingVol ? existingVol.lng : currentDisasterLocation.lng + (Math.random() - 0.5) * 0.02
     };
 
     try {
@@ -1284,8 +1313,8 @@ export default function Home() {
   };
 
   const handleVolunteerCompleteDispatch = async (req) => {
-    const volunteerName = volunteerProfile.name || currentUser?.fullName || 'Field Volunteer';
-    const volunteerSpec = volunteerProfile.specialty || 'Volunteer';
+    const volunteerName = volunteerProfile.name || currentUser?.fullName || 'Field Rescuer';
+    const volunteerSpec = volunteerProfile.specialty || 'Rescuer';
 
     const updatedReq = {
       ...req,
@@ -1467,8 +1496,8 @@ export default function Home() {
       phone: volPhone,
       status: 'available',
       verified: false,
-      lat: currentBaseLocation.lat + (Math.random() - 0.5) * 0.04,
-      lng: currentBaseLocation.lng + (Math.random() - 0.5) * 0.04
+      lat: currentDisasterLocation.lat + (Math.random() - 0.5) * 0.04,
+      lng: currentDisasterLocation.lng + (Math.random() - 0.5) * 0.04
     };
 
     setVolunteers(prev => [newVol, ...prev]);
@@ -1477,7 +1506,7 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newVol)
     }).catch(err => console.warn("Failed to persist volunteer:", err));
-    showToast(`Thank you ${volName}! You are registered as ${volRole} volunteer.`, 'success');
+    showToast(`Thank you ${volName}! You are registered as ${volRole} rescuer.`, 'success');
     setVolName('');
     setVolPhone('');
   };
@@ -1640,8 +1669,8 @@ export default function Home() {
   const handleGenerateMockSOS = async () => {
     const latOffset = (Math.random() - 0.5) * 0.03;
     const lngOffset = (Math.random() - 0.5) * 0.03;
-    const mockLat = currentBaseLocation.lat + latOffset;
-    const mockLng = currentBaseLocation.lng + lngOffset;
+    const mockLat = currentDisasterLocation.lat + latOffset;
+    const mockLng = currentDisasterLocation.lng + lngOffset;
 
     const needTypes = ["Medical", "Food & Water", "Shelter", "Ambulance", "Rescue Team"];
     const names = ["Suresh K.", "Ravi Kumar", "Anitha M.", "Prakash Gowda", "Latha S."];
@@ -1807,7 +1836,7 @@ export default function Home() {
           if (routeTimeoutRef.current) clearTimeout(routeTimeoutRef.current);
           routeTimeoutRef.current = setTimeout(() => {
             setRouteCoordinates([]);
-            fetchWeather(currentBaseLocation.lat, currentBaseLocation.lng);
+            fetchWeather(currentDisasterLocation.lat, currentDisasterLocation.lng);
           }, 20000);
 
           if (routeModalTimeoutRef.current) clearTimeout(routeModalTimeoutRef.current);
@@ -1833,7 +1862,7 @@ export default function Home() {
         return;
       }
       if (!navigator.geolocation) {
-        resolve({ lat: currentBaseLocation.lat, lng: currentBaseLocation.lng, source: 'Base Telemetry Fallback' });
+        resolve({ lat: currentDisasterLocation.lat, lng: currentDisasterLocation.lng, source: 'Current Disaster Location Fallback' });
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -1841,7 +1870,7 @@ export default function Home() {
           resolve({ lat: position.coords.latitude, lng: position.coords.longitude, source: 'GPS' });
         },
         () => {
-          resolve({ lat: currentBaseLocation.lat, lng: currentBaseLocation.lng, source: 'Base Telemetry Fallback' });
+          resolve({ lat: currentDisasterLocation.lat, lng: currentDisasterLocation.lng, source: 'Current Disaster Location Fallback' });
         },
         { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
       );
@@ -2178,7 +2207,7 @@ export default function Home() {
                           onClick={() => fillDemoCredentials('2', '2')}
                           style={{ width: '100%', fontSize: '12px', borderBottomWidth: '2px', padding: '8px 6px' }}
                         >
-                          Victim / Officer (2 / 2)
+                          Victim Portal (2 / 2)
                         </button>
                         <button
                           type="button"
@@ -2186,7 +2215,7 @@ export default function Home() {
                           onClick={() => fillDemoCredentials('3', '3')}
                           style={{ width: '100%', fontSize: '12px', borderBottomWidth: '2px', padding: '8px 6px', borderColor: '#3b82f6', color: '#1d4ed8', fontWeight: '600' }}
                         >
-                          Volunteer (3 / 3)
+                          Rescuer (3 / 3)
                         </button>
                       </div>
                       {authError && <div className="error-message" style={{ display: 'block' }}>{authError}</div>}
@@ -2381,6 +2410,8 @@ export default function Home() {
                   lat={currentBaseLocation.lat}
                   lng={currentBaseLocation.lng}
                   name={currentBaseLocation.name}
+                  disasterLocation={currentDisasterLocation}
+                  fitBoundsLocations={true}
                   requests={requests}
                   volunteers={volunteers}
                   onMapClick={handleMapClick}
@@ -2422,7 +2453,7 @@ export default function Home() {
                                 <span className={`status-badge status-${req.status}`}>{req.status.toUpperCase()}</span>
                                 {req.dispatchStatus === 'completed' ? (
                                   <span style={{ fontSize: '11px', fontWeight: '700', color: '#15803d', background: '#dcfce7', border: '1px solid #86efac', padding: '3px 7px', borderRadius: '4px', display: 'inline-block' }}>
-                                    ✓ Allocated by {req.completedByVolunteerName || 'Volunteer'}{req.completedBySpecialty ? ` (${req.completedBySpecialty})` : ''}
+                                    ✓ Allocated by {req.completedByVolunteerName || 'Rescuer'}{req.completedBySpecialty ? ` (${req.completedBySpecialty})` : ''}
                                   </span>
                                 ) : req.assignedVolunteerName ? (
                                   <span style={{ fontSize: '10.5px', fontWeight: '700', color: '#b45309', background: '#fef3c7', border: '1px solid #fcd34d', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>
@@ -3056,7 +3087,9 @@ export default function Home() {
                 <i className={mobileView ? "fas fa-desktop" : "fas fa-mobile-alt"}></i>
               </button>
               <div className="user-info">
-                <span id="userDashboardRole">{currentUser.fullName}</span>
+                <span id="userDashboardRole" style={{ whiteSpace: 'nowrap' }}>
+                  {currentUser.fullName === 'On-Duty Officer' ? 'Victim Portal' : currentUser.fullName}
+                </span>
               </div>
               <button className="btn btn-logout btn-small" onClick={handleLogout}>{t.logout}</button>
             </div>
@@ -3067,12 +3100,25 @@ export default function Home() {
 
               {/* User map coordinate picker */}
               <div className="map-section">
-                <h2><i className="fas fa-map-marked-alt"></i> {t.location_map}</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                  <h2 style={{ margin: 0 }}><i className="fas fa-map-marked-alt"></i> {t.location_map}</h2>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-small"
+                    onClick={handleAutoFetchGPS}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600' }}
+                  >
+                    <i className="fas fa-location-crosshairs"></i> Use Current GPS
+                  </button>
+                </div>
                 <div style={{ height: '560px', minHeight: '500px', width: '100%', border: '1px solid #ddd', borderRadius: '12px', overflow: 'hidden' }}>
                   <MapComponent
                     lat={currentBaseLocation.lat}
                     lng={currentBaseLocation.lng}
                     name={currentBaseLocation.name}
+                    centerLat={currentDisasterLocation.lat}
+                    centerLng={currentDisasterLocation.lng}
+                    disasterLocation={currentDisasterLocation}
                     requests={requests}
                     volunteers={volunteers}
                     onMapClick={handleMapClick}
@@ -3345,7 +3391,7 @@ export default function Home() {
                 <span id="volunteerRoleBadge" style={{ fontWeight: 'bold', color: '#ffffff' }}>
                   {volunteerProfile.isVerified
                     ? `✓ ${volunteerProfile.name} (${volunteerProfile.specialty})`
-                    : 'Volunteer · Verification Required'}
+                    : 'Rescuer · Verification Required'}
                 </span>
               </div>
               <button className="btn btn-logout btn-small" onClick={handleLogout}>{t.logout}</button>
@@ -3361,34 +3407,12 @@ export default function Home() {
                     <i className="fas fa-id-card"></i>
                   </div>
                   <div>
-                    <h2 style={{ margin: 0, color: 'var(--color-primary)' }}>Volunteer Credential &amp; Specialty Verification</h2>
+                    <h2 style={{ margin: 0, color: 'var(--color-primary)' }}>Rescuer Credential &amp; Specialty Verification</h2>
                     <p style={{ margin: '2px 0 0', fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: '400' }}>
                       Select your area of specialty or profession and upload the required official document to activate dispatch access.
                     </p>
                   </div>
                 </div>
-
-                {volunteers.filter(v => v.verified).length > 0 && (
-                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '10px', background: '#f8fafc', border: '1px solid var(--color-border)' }}>
-                    <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--color-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <i className="fas fa-user-check"></i> Already Verified? Continue as Existing Volunteer Profile:
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {volunteers.filter(v => v.verified).map(vol => (
-                        <button
-                          key={vol.id}
-                          type="button"
-                          className="btn btn-secondary btn-small"
-                          onClick={() => handleSelectExistingVolunteer(vol)}
-                          style={{ width: 'auto', padding: '7px 12px', fontSize: '12.5px', fontWeight: '600', borderColor: '#93c5fd', background: '#eff6ff', color: '#1e40af' }}
-                        >
-                          <i className="fas fa-check-circle" style={{ color: '#16a34a', marginRight: '6px' }}></i>
-                          {vol.name} ({vol.specialty || vol.role})
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 <form onSubmit={handleVolunteerVerifySubmit} style={{ marginTop: '18px' }}>
                   <div className="form-row">
@@ -3500,7 +3524,7 @@ export default function Home() {
 
                   <button type="submit" className="btn btn-primary" id="verifyVolunteerBtn" style={{ marginTop: '18px', height: '54px', fontSize: '16px', fontWeight: 'bold' }}>
                     <i className="fas fa-shield-check" style={{ marginRight: '8px' }}></i>
-                    Verify Document &amp; Enter Volunteer Dashboard
+                    Verify Document &amp; Enter Rescuers Dashboard
                   </button>
                 </form>
               </div>
@@ -3670,6 +3694,9 @@ export default function Home() {
                           lat={currentBaseLocation.lat}
                           lng={currentBaseLocation.lng}
                           name={currentBaseLocation.name}
+                          centerLat={currentDisasterLocation.lat}
+                          centerLng={currentDisasterLocation.lng}
+                          disasterLocation={currentDisasterLocation}
                           requests={requests}
                           volunteers={volunteers}
                           onMapClick={handleMapClick}
@@ -3696,7 +3723,7 @@ export default function Home() {
                                 <th>Request ID</th>
                                 <th>Resource</th>
                                 <th>Qty</th>
-                                <th>Allocated By Volunteer</th>
+                                <th>Allocated By Rescuer</th>
                                 <th>Status</th>
                               </tr>
                             </thead>
@@ -3769,14 +3796,14 @@ export default function Home() {
                 />
               </div>
               <div className="form-group" style={{ marginTop: '10px' }}>
-                <label htmlFor="allocateVolunteerSelect">Dispatch / Assign to Volunteer</label>
+                <label htmlFor="allocateVolunteerSelect">Dispatch / Assign to Rescuer</label>
                 <select
                   id="allocateVolunteerSelect"
                   className="form-control"
                   value={allocateVolunteerId}
                   onChange={(e) => setAllocateVolunteerId(e.target.value)}
                 >
-                  <option value="">-- Select Verified Volunteer to Dispatch (Optional) --</option>
+                  <option value="">-- Select Verified Rescuer to Dispatch (Optional) --</option>
                   {volunteers.map(v => (
                     <option key={v.id} value={v.id}>
                       {v.name} ({v.specialty || v.role}) {v.verified ? '✓ Verified' : ''} — {v.status.toUpperCase()}
@@ -3918,16 +3945,16 @@ export default function Home() {
           <div id="dispatchModal" className="modal" style={{ display: 'flex' }}>
             <div className="modal-content" style={{ maxWidth: '850px', width: '90%' }}>
               <div className="modal-header">
-                <h2>{t.dispatch_title || "Dispatch Volunteer"}: {vol ? vol.name : ""}</h2>
+                <h2>{t.dispatch_title || "Dispatch Rescuer"}: {vol ? vol.name : ""}</h2>
                 <button className="btn-close" onClick={() => setDispatchingVolId(null)}>&times;</button>
               </div>
               <div style={{ marginBottom: '15px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                {t.dispatch_desc || "Select a request from the active list below to dispatch the volunteer to that specific location."}
+                {t.dispatch_desc || "Select a request from the active list below to dispatch the rescuer to that specific location."}
               </div>
 
               {activeRequests.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '30px', color: 'var(--color-text-secondary)' }}>
-                  {t.no_pending_requests || "No active requests available to dispatch volunteers to."}
+                  {t.no_pending_requests || "No active requests available to dispatch rescuers to."}
                 </div>
               ) : (
                 <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -3952,7 +3979,7 @@ export default function Home() {
                             </div>
                           </td>
                           <td>
-                            <div style={{ fontSize: '13px' }}>{req.address || "Mandya Region"}</div>
+                            <div style={{ fontSize: '13px' }}>{req.address || "Current Disaster Zone"}</div>
                             <div style={{ fontSize: '11px', color: '#888' }}>Lat: {req.lat.toFixed(4)}, Lng: {req.lng.toFixed(4)}</div>
                           </td>
                           <td>

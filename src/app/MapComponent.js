@@ -1,20 +1,37 @@
 'use client';
 import { useEffect, useRef } from 'react';
 
-export default function MapComponent({ lat, lng, name, requests, volunteers, onMapClick, selectedLocation, routeCoordinates }) {
+export default function MapComponent({
+  lat,
+  lng,
+  name,
+  centerLat,
+  centerLng,
+  disasterLocation,
+  fitBoundsLocations = false,
+  requests,
+  volunteers,
+  onMapClick,
+  selectedLocation,
+  routeCoordinates
+}) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const baseMarkerRef = useRef(null);
+  const disasterMarkerRef = useRef(null);
   const selectedMarkerRef = useRef(null);
   const routePolylineRef = useRef(null);
   const routeGlowRef = useRef(null);
   const tileLayerRef = useRef(null);
+  const initialFitDoneRef = useRef(false);
 
   // Initialize Map
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const L = require('leaflet');
+    const targetLat = centerLat ?? lat;
+    const targetLng = centerLng ?? lng;
     
     // Fix default marker icon issues in Webpack/Next.js
     delete L.Icon.Default.prototype._getIconUrl;
@@ -32,48 +49,79 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
         touchZoom: true,
         boxZoom: true,
         dragging: true
-      }).setView([lat, lng], 13);
+      }).setView([targetLat, targetLng], 13);
 
       tileLayerRef.current = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapRef.current);
 
+      if (fitBoundsLocations && disasterLocation && typeof disasterLocation.lat === 'number' && typeof disasterLocation.lng === 'number') {
+        const bounds = L.latLngBounds([[lat, lng], [disasterLocation.lat, disasterLocation.lng]]);
+        mapRef.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 12 });
+        initialFitDoneRef.current = true;
+      }
+
       setTimeout(() => {
         mapRef.current?.invalidateSize();
       }, 150);
     } else if (mapRef.current) {
-      // Avoid jarring jumps if user is interacting, but center on base if coords change significantly
-      const currentCenter = mapRef.current.getCenter();
-      if (Math.abs(currentCenter.lat - lat) > 0.05 || Math.abs(currentCenter.lng - lng) > 0.05) {
-        mapRef.current.setView([lat, lng]);
+      // Avoid jarring jumps if user is interacting, unless view mode/center shifts significantly
+      if (fitBoundsLocations && disasterLocation && !initialFitDoneRef.current) {
+        const bounds = L.latLngBounds([[lat, lng], [disasterLocation.lat, disasterLocation.lng]]);
+        mapRef.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 12 });
+        initialFitDoneRef.current = true;
+      } else if (!fitBoundsLocations) {
+        const currentCenter = mapRef.current.getCenter();
+        if (Math.abs(currentCenter.lat - targetLat) > 0.05 || Math.abs(currentCenter.lng - targetLng) > 0.05) {
+          mapRef.current.setView([targetLat, targetLng], 13);
+        }
       }
     }
 
     const map = mapRef.current;
     if (!map) return;
 
-    // 1. Sync Base Station Marker as a Resource Depot (Red Pin icon)
+    // 1. Sync Govt Official Head Office Marker (Mysuru Depot Pin)
     if (baseMarkerRef.current) {
       baseMarkerRef.current.remove();
     }
     const baseIcon = L.divIcon({
       className: 'base-station-marker',
-      html: `<div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px;"><i class="fas fa-map-pin" style="color: #ef4444; font-size: 26px; filter: drop-shadow(0 0 4px rgba(239,68,68,0.8));"></i></div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 30]
+      html: `<div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #1d4ed8; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 10px rgba(29,78,216,0.75);"><i class="fas fa-landmark" style="color: #ffffff; font-size: 14px;"></i></div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
     });
     baseMarkerRef.current = L.marker([lat, lng], { icon: baseIcon })
       .addTo(map)
-      .bindPopup(`<b>📡 Suraksha Setu Resource Depot (${name})</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}<br>Status: Active Depot`);
+      .bindPopup(`<b>🏛️ Govt Official Head Office (${name})</b><br>Mysuru Command &amp; Resource Depot<br>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`);
+
+    // 1b. Sync Current Disaster Epicenter Marker (Current GPS / Disaster Zone)
+    if (disasterMarkerRef.current) {
+      disasterMarkerRef.current.remove();
+      disasterMarkerRef.current = null;
+    }
+    const dLat = disasterLocation && typeof disasterLocation.lat === 'number' ? disasterLocation.lat : targetLat;
+    const dLng = disasterLocation && typeof disasterLocation.lng === 'number' ? disasterLocation.lng : targetLng;
+    if (disasterLocation && typeof disasterLocation.lat === 'number' && typeof disasterLocation.lng === 'number') {
+      const disasterIcon = L.divIcon({
+        className: 'disaster-epicenter-marker',
+        html: `<div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b); border: 2.5px solid #ffffff; border-radius: 50%; box-shadow: 0 0 14px rgba(239,68,68,0.95);"><i class="fas fa-house-tsunami" style="color: #ffffff; font-size: 13px;"></i></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+      disasterMarkerRef.current = L.marker([dLat, dLng], { icon: disasterIcon })
+        .addTo(map)
+        .bindPopup(`<b>🚨 Current Disaster Location</b><br>${disasterLocation.source || 'Active Impact Zone'}<br>Lat: ${dLat.toFixed(6)}, Lng: ${dLng.toFixed(6)}`);
+    }
 
     // 2. Clear old request, volunteer, and shelter markers
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    // 3. Add Shelters (Green sphere markers with house icon)
+    // 3. Add Shelters around current disaster location (Green sphere markers with house icon)
     const mockShelters = [
-      { lat: lat + 0.003, lng: lng - 0.004, name: 'Mandya Emergency Shelter A', capacity: '120/150' },
-      { lat: lat - 0.004, lng: lng + 0.005, name: 'MIMS Doctors Quarters Shelter', capacity: '85/100' }
+      { lat: dLat + 0.004, lng: dLng - 0.005, name: 'Current Zone Emergency Shelter A', capacity: '120/150' },
+      { lat: dLat - 0.005, lng: dLng + 0.006, name: 'Sector Relief Camp Shelter B', capacity: '85/100' }
     ];
     mockShelters.forEach(s => {
       const shelterIcon = L.divIcon({
@@ -133,7 +181,7 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
     return () => {
       map.off('click', onMapClicked);
     };
-  }, [lat, lng, name, requests, volunteers, onMapClick]);
+  }, [lat, lng, name, centerLat, centerLng, disasterLocation, fitBoundsLocations, requests, volunteers, onMapClick]);
 
   // Keep Leaflet size synced on container resize and clean up cleanly on unmount
   useEffect(() => {
@@ -153,6 +201,7 @@ export default function MapComponent({ lat, lng, name, requests, volunteers, onM
         mapRef.current = null;
         tileLayerRef.current = null;
         baseMarkerRef.current = null;
+        disasterMarkerRef.current = null;
         selectedMarkerRef.current = null;
         routePolylineRef.current = null;
         routeGlowRef.current = null;
